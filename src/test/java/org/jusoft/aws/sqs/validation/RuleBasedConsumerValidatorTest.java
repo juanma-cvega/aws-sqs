@@ -7,14 +7,12 @@ import org.jusoft.aws.sqs.ValidationRule;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static java.lang.System.lineSeparator;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.joining;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -86,13 +84,14 @@ public class RuleBasedConsumerValidatorTest {
 
   @Test
   public void whenSeveralRulesReturnInvalidThenTheResultShouldReturnInvalidAndAllErrorMessages() {
-    Set<ValidationRule> rules = new LinkedHashSet<>(asList(IS_NOT_VALID_RULE, IS_NOT_VALID_RULE_2));
+    Set<ValidationRule> rules = new HashSet<>(asList(IS_NOT_VALID_RULE, IS_NOT_VALID_RULE_2));
     validator = new RuleBasedConsumerValidator(rules);
-    String errors = Stream.of(ERROR_MESSAGE_VALUE, ERROR_MESSAGE_VALUE_2).collect(joining(lineSeparator()));
 
     assertThatThrownBy(() -> validator.isValid(CONSUMERS))
       .isInstanceOf(IllegalArgumentException.class)
-      .hasMessage(String.format(VALIDATION_ERROR_MESSAGE, errors));
+      .hasMessageContaining(VALIDATION_ERROR_MESSAGE.replace("%s", EMPTY))
+      .hasMessageContaining(ERROR_MESSAGE_VALUE)
+      .hasMessageContaining(ERROR_MESSAGE_VALUE_2);
 
     assertThat(CONSUMER_INSTANCE.counter).isEqualTo(2);
   }
