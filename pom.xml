@@ -120,9 +120,9 @@
         <configuration>
           <append>true</append>
           <excludes>
-            <exclude>*hashCode</exclude>
-            <exclude>*equals</exclude>
-            <exclude>*toString</exclude>
+            <exclude>*#hashCode</exclude>
+            <exclude>*#equals</exclude>
+            <exclude>*#toString</exclude>
           </excludes>
         </configuration>
         <executions>
