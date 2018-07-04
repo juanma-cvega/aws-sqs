@@ -48,7 +48,7 @@ public class ParametersAnnotationsValidationRule implements ValidationRule {
   }
 
   private boolean isParametersSizeValid(List<Class<?>> parametersType) {
-    return parametersType.size() > 0;
+    return !parametersType.isEmpty();
   }
 
   private ErrorMessage validateAllConsumerParametersHaveValidAnnotations(Consumer consumer) {

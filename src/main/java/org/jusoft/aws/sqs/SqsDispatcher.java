@@ -78,7 +78,8 @@ public class SqsDispatcher {
 
   private void start(Consumer consumer) {
     SqsConsumer consumerProperties = consumer.getAnnotation();
-    LOGGER.info("Starting consumer: queue={}", consumerProperties.value());
+    String queueName = consumerProperties.value();
+    LOGGER.info("Starting consumer: queue={}", queueName);
 
     String queueUrl = findQueueUrlOrFailFrom(consumerProperties);
     ReceiveMessageRequest request = createMessageRequestFrom(consumerProperties, queueUrl);
@@ -86,7 +87,7 @@ public class SqsDispatcher {
       try {
         ReceiveMessageResult receiveMessageResult = sqsClient.receiveMessage(request);
         LOGGER.trace("Message(s) received from queue: size={}", receiveMessageResult.getMessages().size());
-        if (receiveMessageResult.getMessages().size() > 0) {
+        if (!receiveMessageResult.getMessages().isEmpty()) {
           deleteMessageService.deleteMessage(
             consumerProperties.deletePolicy(),
             receiveMessageResult,
@@ -97,7 +98,7 @@ public class SqsDispatcher {
         LOGGER.error("Error while consuming messages: queueName={}", queueUrl, e);
       }
     }
-    LOGGER.info("Closing consumer: queueName={}", consumerProperties.value());
+    LOGGER.info("Closing consumer: queueName={}", queueName);
   }
 
   private String findQueueUrlOrFailFrom(SqsConsumer consumerProperties) {

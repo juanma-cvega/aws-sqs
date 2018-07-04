@@ -16,18 +16,13 @@ public class ErrorMessage {
   private final Set<String> messages;
 
   private ErrorMessage() {
-    this(new HashSet<>());
+    messages = new HashSet<>();
   }
 
   private ErrorMessage(String message) {
     this();
     notNull(message);
     messages.add(message);
-  }
-
-  private ErrorMessage(Set<String> messages) {
-    this.messages = messages;
-    notNull(this.messages);
   }
 
   public static ErrorMessage of(String message, Object... arguments) {
