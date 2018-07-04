@@ -37,6 +37,14 @@ jobs:
             - ~/.m2
           key: v1-dependencies-{{ checksum "pom.xml" }}
 
-      # run tests!
-      - run: mvn clean test
+      - store_test_results:
+          path: target/surefire-reports
+
+      - store_artifacts:
+          path: target/aws-sqs-0.0.1-SNAPSHOT.jar
+
+      - run: mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent package sonar:sonar
+                      -Dsonar.host.url=https://sonarcloud.io
+                      -Dsonar.organization=${SONAR_API_ORGANIZATION}
+                      -Dsonar.login=${SONAR_API_LOGIN}
 

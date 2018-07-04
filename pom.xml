@@ -24,15 +24,13 @@
     <java-target>1.8</java-target>
     <java-source>1.8</java-source>
     <jacoco.maven.plugin.version>0.8.1</jacoco.maven.plugin.version>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <commons.lang3.version>3.7</commons.lang3.version>
     <maven-compiler-plugin>1.8</maven-compiler-plugin>
     <maven-compiler-plugin.version>3.3</maven-compiler-plugin.version>
     <maven-resources-plugin.version>3.0.2</maven-resources-plugin.version>
     <maven-surefire-plugin.version>2.20.1</maven-surefire-plugin.version>
-    <maven-failsafe-plugin.version>2.20.1</maven-failsafe-plugin.version>
+    <project-encoding>UTF-8</project-encoding>
   </properties>
 
   <dependencies>
@@ -94,7 +92,7 @@
         <configuration>
           <source>${java-source}</source>
           <target>${java-target}</target>
-          <encoding>UTF-8</encoding>
+          <encoding>${project-encoding}</encoding>
         </configuration>
       </plugin>
       <plugin>
@@ -102,7 +100,17 @@
         <artifactId>maven-resources-plugin</artifactId>
         <version>${maven-resources-plugin.version}</version>
         <configuration>
-          <encoding>UTF-8</encoding>
+          <encoding>${project-encoding}</encoding>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>${maven-surefire-plugin.version}</version>
+        <configuration>
+          <excludes>
+            <exclude>*ITest*</exclude>
+          </excludes>
         </configuration>
       </plugin>
     </plugins>

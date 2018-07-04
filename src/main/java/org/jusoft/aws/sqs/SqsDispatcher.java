@@ -6,26 +6,28 @@ import com.amazonaws.services.sqs.model.Message;
 import com.amazonaws.services.sqs.model.QueueDoesNotExistException;
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import com.amazonaws.services.sqs.model.ReceiveMessageResult;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.Validate;
 import org.jusoft.aws.sqs.annotations.SqsAttribute;
 import org.jusoft.aws.sqs.annotations.SqsBody;
 import org.jusoft.aws.sqs.annotations.SqsConsumer;
 import org.jusoft.aws.sqs.executor.SqsExecutorFactory;
+import org.jusoft.aws.sqs.mapper.MessageMapper;
 import org.jusoft.aws.sqs.provider.ConsumerInstanceProvider;
 import org.jusoft.aws.sqs.validation.ConsumerValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.toList;
@@ -36,7 +38,7 @@ public class SqsDispatcher {
   private static final Logger LOGGER = LoggerFactory.getLogger(SqsDispatcher.class);
 
   private final AmazonSQS sqsClient;
-  private final ObjectMapper objectMapper;
+  private final MessageMapper messageMapper;
   private final DeleteMessageService deleteMessageService;
   private final ConsumerInstanceProvider consumersProvider;
   private final SqsExecutorFactory sqsExecutorFactory;
@@ -47,13 +49,13 @@ public class SqsDispatcher {
 
 
   public SqsDispatcher(AmazonSQS sqsClient,
-                       ObjectMapper objectMapper,
+                       MessageMapper messageMapper,
                        DeleteMessageService deleteMessageService,
                        ConsumerInstanceProvider consumersProvider,
                        SqsExecutorFactory sqsExecutorFactory,
                        ConsumerValidator consumerValidator) {
     this.sqsClient = sqsClient;
-    this.objectMapper = objectMapper;
+    this.messageMapper = messageMapper;
     this.deleteMessageService = deleteMessageService;
     this.consumersProvider = consumersProvider;
     this.sqsExecutorFactory = sqsExecutorFactory;
@@ -83,8 +85,8 @@ public class SqsDispatcher {
     while (isDispatcherRunning) {
       try {
         ReceiveMessageResult receiveMessageResult = sqsClient.receiveMessage(request);
+        LOGGER.trace("Message(s) received from queue: size={}", receiveMessageResult.getMessages().size());
         if (receiveMessageResult.getMessages().size() > 0) {
-          LOGGER.trace("Message(s) received from queue: size={}", receiveMessageResult.getMessages().size());
           deleteMessageService.deleteMessage(
             consumerProperties.deletePolicy(),
             receiveMessageResult,
@@ -119,12 +121,8 @@ public class SqsDispatcher {
   private Function<ReceiveMessageResult, Boolean> consumeMessage(Consumer consumer) {
     return receiveMessageResult -> {
       try {
-        Object methodParameter = createConsumerParameterFrom(consumer.getConsumerMethod(), receiveMessageResult);
-        if (methodParameter instanceof Object[]) {
-          consumer.getConsumerMethod().invoke(consumer.getConsumerInstance(), (Object[]) methodParameter);
-        } else {
-          consumer.getConsumerMethod().invoke(consumer.getConsumerInstance(), methodParameter);
-        }
+        Object[] consumerParameters = createConsumerParametersFrom(consumer.getConsumerMethod(), receiveMessageResult);
+        consumer.getConsumerMethod().invoke(consumer.getConsumerInstance(), consumerParameters);
         return true;
       } catch (Exception e) {
         LOGGER.error("Error invoking method", e);
@@ -133,48 +131,68 @@ public class SqsDispatcher {
     };
   }
 
-  private Object createConsumerParameterFrom(Method consumer, ReceiveMessageResult receiveMessageResult) throws IOException {
+  private Object[] createConsumerParametersFrom(Method consumer, ReceiveMessageResult receiveMessageResult) {
+    Object[] result;
     if (isOnlyBodyExpected(consumer)) {
-      Class<?> consumerParameter = consumer.getParameterTypes()[0];
-      Class<?> argumentType = getParameterClassTypeFrom(consumer, consumerParameter);
-      if (consumerParameter.equals(List.class)) {
-        return receiveMessageResult.getMessages().stream()
-          .map(message -> toListenerParameter(argumentType, message))
-          .collect(toList());
-      } else {
-        Message message = receiveMessageResult.getMessages().get(0);
-        return objectMapper.readValue(message.getBody(), argumentType);
-      }
+      result = new Object[]{createFirstParameterFrom(consumer, receiveMessageResult)};
     } else {
-      List<Object> parameters = new ArrayList<>();
-      Annotation[][] parametersAnnotations = consumer.getParameterAnnotations();
-      for (int parameterIndex = 0; parameterIndex < parametersAnnotations.length; parameterIndex++) {
-        for (Annotation parameterAnnotation : parametersAnnotations[parameterIndex]) {
-          if (parameterAnnotation.annotationType() == SqsBody.class) {
-            Class<?> consumerParameter = consumer.getParameterTypes()[parameterIndex];
-            Class<?> argumentType = getParameterClassTypeFrom(consumer, consumerParameter);
-            if (consumerParameter.equals(List.class)) {
-              parameters.add(receiveMessageResult.getMessages().stream()
-                .map(message -> toListenerParameter(argumentType, message))
-                .collect(toList()));
-            } else {
-              Message message = receiveMessageResult.getMessages().get(0);
-              parameters.add(objectMapper.readValue(message.getBody(), argumentType));
-            }
-          } else if (parameterAnnotation.annotationType() == SqsAttribute.class) {
-            String attributeName = ((SqsAttribute) parameterAnnotation).value();
-            Message message = receiveMessageResult.getMessages().get(0);
-            String attributeValue = message.getAttributes().get(attributeName); //TODO addMessage option to return a specific type
-            parameters.add(attributeValue);
-          }
-        }
-      }
-      return parameters.toArray();
+      result = Stream.of(consumer.getParameters())
+        .map(parameter -> toDeserializedObject(consumer, receiveMessageResult, parameter))
+        .toArray();
     }
+    return result;
+  }
+
+  private Object toDeserializedObject(Method consumer, ReceiveMessageResult receiveMessageResult, Parameter parameter) {
+    return Stream.of(parameter.getAnnotations())
+      .filter(isAnySqsAnnotation())
+      .findFirst()
+      .map(annotation -> createParameterFrom(annotation, consumer, receiveMessageResult, parameter))
+      .orElse(null); //Parameter initiated to null. Not happening as long as validation rules are in place
+  }
+
+  private Predicate<Annotation> isAnySqsAnnotation() {
+    return annotation -> annotation.annotationType() == SqsBody.class || annotation.annotationType() == SqsAttribute.class;
+  }
+
+  private Object createFirstParameterFrom(Method consumer, ReceiveMessageResult receiveMessageResult) {
+    return createParameterFrom(consumer, receiveMessageResult, consumer.getParameters()[0]);
+  }
+
+  private Object createParameterFrom(Annotation annotation, Method consumer, ReceiveMessageResult receiveMessageResult, Parameter parameter) {
+    Object result;
+    if (annotation.annotationType() == SqsBody.class) {
+      result = createParameterFrom(consumer, receiveMessageResult, parameter);
+    } else {
+      result = getAttributeFrom(receiveMessageResult, (SqsAttribute) annotation);
+    }
+    return result;
+  }
+
+  private Object createParameterFrom(Method consumer, ReceiveMessageResult receiveMessageResult, Parameter parameter) {
+    Object result;
+    Class<?> argumentType = getParameterClassTypeFrom(consumer, parameter.getType());
+    if (parameter.getType().equals(List.class)) {
+      result = receiveMessageResult.getMessages().stream()
+        .map(message -> messageMapper.deserialize(message.getBody(), argumentType))
+        .collect(toList());
+    } else {
+      Validate.isTrue(receiveMessageResult.getMessages().size() == 1,
+        "There can only be one message when parameter is not a list");
+      Message message = receiveMessageResult.getMessages().get(0);
+      result = messageMapper.deserialize(message.getBody(), argumentType);
+    }
+    return result;
+  }
+
+  private String getAttributeFrom(ReceiveMessageResult receiveMessageResult, SqsAttribute parameterAnnotation) {
+    String attributeName = parameterAnnotation.value();
+    Message message = receiveMessageResult.getMessages().get(0); //Only one message is allowed when using attributes
+    return message.getAttributes().get(attributeName);
   }
 
   private boolean isOnlyBodyExpected(Method consumer) {
-    return consumer.getParameterTypes().length == 1;
+    return consumer.getParameters().length == 1;
   }
 
   private Class<?> getParameterClassTypeFrom(Method consumer, Class<?> parameterType) {
@@ -187,14 +205,6 @@ public class SqsDispatcher {
       argumentType = parameterType;
     }
     return argumentType;
-  }
-
-  private Object toListenerParameter(Class<?> argumentType, Message message) {
-    try {
-      return objectMapper.readValue(message.getBody(), argumentType);
-    } catch (IOException e) {
-      throw new RuntimeException("Unable to deserialize body", e);
-    }
   }
 
   /**

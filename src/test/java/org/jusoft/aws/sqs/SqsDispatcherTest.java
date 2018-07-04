@@ -16,6 +16,7 @@ import org.jusoft.aws.sqs.annotations.SqsAttribute;
 import org.jusoft.aws.sqs.annotations.SqsBody;
 import org.jusoft.aws.sqs.annotations.SqsConsumer;
 import org.jusoft.aws.sqs.executor.SqsExecutorFactory;
+import org.jusoft.aws.sqs.mapper.JacksonMessageMapper;
 import org.jusoft.aws.sqs.provider.ConsumerInstanceProvider;
 import org.jusoft.aws.sqs.validation.ConsumerValidator;
 import org.mockito.ArgumentCaptor;
@@ -93,7 +94,7 @@ public class SqsDispatcherTest {
   @Before
   public void setup() {
     deleteMessageService = new DeleteMessageServiceMock();
-    sqsDispatcher = new SqsDispatcher(amazonSQS, new ObjectMapper(), deleteMessageService, consumerInstanceProvider, sqsExecutionFactory, consumerValidator);
+    sqsDispatcher = new SqsDispatcher(amazonSQS, new JacksonMessageMapper(new ObjectMapper()), deleteMessageService, consumerInstanceProvider, sqsExecutionFactory, consumerValidator);
   }
 
   @Test

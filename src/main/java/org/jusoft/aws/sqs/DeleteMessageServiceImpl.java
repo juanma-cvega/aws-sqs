@@ -49,7 +49,8 @@ public class DeleteMessageServiceImpl implements DeleteMessageService {
       .collect(toList());
     DeleteMessageBatchResult result = amazonSQS.deleteMessageBatch(new DeleteMessageBatchRequest().withQueueUrl(queueUrl).withEntries(deleteRequests));
     if (result.getFailed().size() > 0) {
-      LOGGER.error("Error deleting messages from SQS: messages={}", result.getFailed());
+      LOGGER.error("Error deleting messages from SQS: queueUrl={}, messages={}", queueUrl, result.getFailed());
     }
+    LOGGER.trace("Messages deleted from SQS: queueUrl={}, messages={}", queueUrl, result.getSuccessful());
   }
 }
