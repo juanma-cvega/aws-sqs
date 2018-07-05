@@ -9,7 +9,7 @@ import java.lang.reflect.Method;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class StaticQueueConsumersInstanceProviderTest {
+public class StaticConsumersInstanceProviderTest {
 
   private static final String QUEUE_NAME = "queueName";
 

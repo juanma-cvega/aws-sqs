@@ -18,7 +18,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.jusoft.aws.sqs.validation.rule.ErrorMessage.noError;
 import static org.jusoft.aws.sqs.validation.rule.RuleBasedConsumerValidator.VALIDATION_ERROR_MESSAGE;
 
-public class RuleBasedQueueConsumerValidatorTest {
+public class RuleBasedConsumerValidatorTest {
 
   private static final TestConsumer CONSUMER_INSTANCE = new TestConsumer();
   private static final Method CONSUMER_METHOD = Stream.of(CONSUMER_INSTANCE.getClass().getDeclaredMethods())

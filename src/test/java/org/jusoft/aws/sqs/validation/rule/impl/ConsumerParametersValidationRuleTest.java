@@ -8,7 +8,7 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.jusoft.aws.sqs.validation.rule.impl.ConsumerParametersValidationRule.MINIMUM_PARAMETERS_VALUE_ERROR;
 
-public class QueueConsumerParametersValidationRuleTest extends AbstractValidationRuleTest {
+public class ConsumerParametersValidationRuleTest extends AbstractValidationRuleTest {
 
   private final ConsumerParametersValidationRule rule = new ConsumerParametersValidationRule();
 

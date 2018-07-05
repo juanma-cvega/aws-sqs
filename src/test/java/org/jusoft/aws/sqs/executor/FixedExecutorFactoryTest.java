@@ -13,7 +13,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SqsFixedExecutorFactoryTest {
+public class FixedExecutorFactoryTest {
 
   private final FixedExecutorFactory sqsFixedExecutorFactory = new FixedExecutorFactory();
 
