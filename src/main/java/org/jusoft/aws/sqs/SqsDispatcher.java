@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.PostConstruct;
+import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 
@@ -96,9 +97,9 @@ public class SqsDispatcher {
       try {
         Object[] consumerParameters = consumerParametersMapper.createFrom(queueConsumer.getConsumerMethod(), receiveMessageResult);
         queueConsumer.getConsumerMethod().invoke(queueConsumer.getConsumerInstance(), consumerParameters);
-      } catch (Exception e) {
+      } catch (IllegalAccessException | InvocationTargetException e) {
         LOGGER.error("Error invoking method", e);
-        throw new RuntimeException(String.format("Unable to consume message: queue=%s", queueConsumer.getAnnotation().value()), e);
+        throw new IllegalArgumentException(e);
       }
     };
   }
