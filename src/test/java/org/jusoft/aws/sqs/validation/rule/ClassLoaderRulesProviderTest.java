@@ -1,7 +1,7 @@
 package org.jusoft.aws.sqs.validation.rule;
 
 import org.junit.Test;
-import org.jusoft.aws.sqs.Consumer;
+import org.jusoft.aws.sqs.QueueConsumer;
 import org.jusoft.aws.sqs.validation.rule.test.TestValidationRule;
 
 import java.util.Set;
@@ -56,7 +56,7 @@ public class ClassLoaderRulesProviderTest {
   public static class TestValidationRuleOne implements ValidationRule {
 
     @Override
-    public ConsumerValidationResult validate(Consumer consumer) {
+    public ConsumerValidationResult validate(QueueConsumer queueConsumer) {
       return null;
     }
   }
@@ -64,7 +64,7 @@ public class ClassLoaderRulesProviderTest {
   public static class TestValidationRuleTwo implements ValidationRule {
 
     @Override
-    public ConsumerValidationResult validate(Consumer consumer) {
+    public ConsumerValidationResult validate(QueueConsumer queueConsumer) {
       return null;
     }
   }
@@ -80,7 +80,7 @@ public class ClassLoaderRulesProviderTest {
   private static class TestPrivateValidation implements ValidationRule {
 
     @Override
-    public ConsumerValidationResult validate(Consumer consumer) {
+    public ConsumerValidationResult validate(QueueConsumer queueConsumer) {
       return null;
     }
   }
@@ -88,7 +88,7 @@ public class ClassLoaderRulesProviderTest {
   protected static class TestProtectedValidation implements ValidationRule {
 
     @Override
-    public ConsumerValidationResult validate(Consumer consumer) {
+    public ConsumerValidationResult validate(QueueConsumer queueConsumer) {
       return null;
     }
   }
@@ -96,7 +96,7 @@ public class ClassLoaderRulesProviderTest {
   static class TestPackageValidation implements ValidationRule {
 
     @Override
-    public ConsumerValidationResult validate(Consumer consumer) {
+    public ConsumerValidationResult validate(QueueConsumer queueConsumer) {
       return null;
     }
   }

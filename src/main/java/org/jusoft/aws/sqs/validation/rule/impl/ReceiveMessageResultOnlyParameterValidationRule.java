@@ -1,7 +1,7 @@
 package org.jusoft.aws.sqs.validation.rule.impl;
 
 import com.amazonaws.services.sqs.model.ReceiveMessageResult;
-import org.jusoft.aws.sqs.Consumer;
+import org.jusoft.aws.sqs.QueueConsumer;
 import org.jusoft.aws.sqs.validation.rule.ConsumerValidationResult;
 import org.jusoft.aws.sqs.validation.rule.ErrorMessage;
 import org.jusoft.aws.sqs.validation.rule.ValidationRule;
@@ -14,18 +14,18 @@ public class ReceiveMessageResultOnlyParameterValidationRule implements Validati
     "Cannot map to ReceiveMessageResult body in a multi parameter consumer. Queue=%s";
 
   @Override
-  public ConsumerValidationResult validate(Consumer consumer) {
-    return ConsumerValidationResult.of(isOnlyParameter(consumer), consumer);
+  public ConsumerValidationResult validate(QueueConsumer queueConsumer) {
+    return ConsumerValidationResult.of(isOnlyParameter(queueConsumer), queueConsumer);
   }
 
-  private ErrorMessage isOnlyParameter(Consumer consumer) {
-    return ErrorMessage.of(() -> isValidConsumer(consumer),
-      RECEIVE_MESSAGE_RESULT_NOT_THE_ONLY_PARAMETER_ERROR, consumer.getAnnotation().value());
+  private ErrorMessage isOnlyParameter(QueueConsumer queueConsumer) {
+    return ErrorMessage.of(() -> isValidConsumer(queueConsumer),
+      RECEIVE_MESSAGE_RESULT_NOT_THE_ONLY_PARAMETER_ERROR, queueConsumer.getAnnotation().value());
 
   }
 
-  private boolean isValidConsumer(Consumer consumer) {
-    return isReceiveMessageResultOneParameter(consumer.getParametersTypes()) && isSingleParameterConsumer(consumer.getParametersTypes());
+  private boolean isValidConsumer(QueueConsumer queueConsumer) {
+    return isReceiveMessageResultOneParameter(queueConsumer.getParametersTypes()) && isSingleParameterConsumer(queueConsumer.getParametersTypes());
   }
 
   private boolean isReceiveMessageResultOneParameter(List<Class<?>> parametersType) {

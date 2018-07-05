@@ -17,15 +17,16 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.Consumer;
 
 import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.verify;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DeleteMessageServiceImplTest {
+public class MessageConsumerServiceImplTest {
 
   private static final String QUEUE_URL = "queueUrl";
   private static final String RECEIPT_HANDLE_1 = "receiptHandle";
@@ -52,41 +53,41 @@ public class DeleteMessageServiceImplTest {
   @Mock
   private AmazonSQS amazonSQS;
   @Mock
-  private Function<ReceiveMessageResult, Boolean> mockConsumer;
+  private Consumer<ReceiveMessageResult> mockConsumer;
 
   @InjectMocks
-  private DeleteMessageServiceImpl deleteMessageService;
+  private MessageConsumerServiceImpl deleteMessageService;
 
   @Test
   public void whenInvokedWithPolicyAfterReadThenConsumerShouldBeCalledAfterDeletingMessages() {
     when(amazonSQS.deleteMessageBatch(DELETE_MESSAGE_BATCH_REQUEST)).thenReturn(DELETE_MESSAGE_BATCH_RESULT);
 
-    deleteMessageService.deleteMessage(DeletePolicy.AFTER_READ, RECEIVE_MESSAGE_RESULT, QUEUE_URL, mockConsumer);
+    deleteMessageService.consumeAndDeleteMessage(DeletePolicy.AFTER_READ, RECEIVE_MESSAGE_RESULT, QUEUE_URL, mockConsumer);
 
     InOrder inOrder = Mockito.inOrder(amazonSQS, mockConsumer);
     inOrder.verify(amazonSQS).deleteMessageBatch(DELETE_MESSAGE_BATCH_REQUEST);
-    inOrder.verify(mockConsumer).apply(RECEIVE_MESSAGE_RESULT);
+    inOrder.verify(mockConsumer).accept(RECEIVE_MESSAGE_RESULT);
   }
 
   @Test
   public void whenInvokedWithPolicyAfterProcessThenConsumerShouldBeCalledBeforeDeletingMessages() {
     when(amazonSQS.deleteMessageBatch(DELETE_MESSAGE_BATCH_REQUEST)).thenReturn(DELETE_MESSAGE_BATCH_RESULT);
-    when(mockConsumer.apply(RECEIVE_MESSAGE_RESULT)).thenReturn(true);
 
-    deleteMessageService.deleteMessage(DeletePolicy.AFTER_PROCESS, RECEIVE_MESSAGE_RESULT, QUEUE_URL, mockConsumer);
+    deleteMessageService.consumeAndDeleteMessage(DeletePolicy.AFTER_PROCESS, RECEIVE_MESSAGE_RESULT, QUEUE_URL, mockConsumer);
 
     InOrder inOrder = Mockito.inOrder(amazonSQS, mockConsumer);
-    inOrder.verify(mockConsumer).apply(RECEIVE_MESSAGE_RESULT);
+    inOrder.verify(mockConsumer).accept(RECEIVE_MESSAGE_RESULT);
     inOrder.verify(amazonSQS).deleteMessageBatch(DELETE_MESSAGE_BATCH_REQUEST);
   }
 
   @Test
-  public void whenInvokedWithPolicyAfterProcessAndConsumerFailsThenMessagesShouldNotBeDeleted() {
-    when(mockConsumer.apply(RECEIVE_MESSAGE_RESULT)).thenReturn(false);
+  public void whenInvokedWithPolicyAfterProcessAndConsumerFailsThenMessagesAreNotDeleted() {
+    RuntimeException exceptionThrown = new RuntimeException();
+    doThrow(exceptionThrown).when(mockConsumer).accept(RECEIVE_MESSAGE_RESULT);
 
-    deleteMessageService.deleteMessage(DeletePolicy.AFTER_PROCESS, RECEIVE_MESSAGE_RESULT, QUEUE_URL, mockConsumer);
+    assertThatThrownBy(() -> deleteMessageService.consumeAndDeleteMessage(DeletePolicy.AFTER_PROCESS, RECEIVE_MESSAGE_RESULT, QUEUE_URL, mockConsumer))
+      .isEqualTo(exceptionThrown);
 
-    verify(mockConsumer).apply(RECEIVE_MESSAGE_RESULT);
     verifyZeroInteractions(amazonSQS);
   }
 }

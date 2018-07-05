@@ -1,6 +1,6 @@
 package org.jusoft.aws.sqs.provider;
 
-import org.jusoft.aws.sqs.Consumer;
+import org.jusoft.aws.sqs.QueueConsumer;
 import org.jusoft.aws.sqs.annotation.SqsConsumer;
 
 import java.lang.reflect.Method;
@@ -11,28 +11,28 @@ import java.util.stream.StreamSupport;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 
-public class StaticConsumerInstanceProvider implements ConsumerInstanceProvider {
+public class StaticConsumersInstanceProvider implements ConsumersInstanceProvider {
 
-  private final Iterable<Consumer> consumers;
+  private final Iterable<QueueConsumer> consumers;
 
-  private StaticConsumerInstanceProvider(Iterable<Consumer> consumers) {
+  private StaticConsumersInstanceProvider(Iterable<QueueConsumer> consumers) {
     this.consumers = consumers;
   }
 
-  public static StaticConsumerInstanceProvider ofConsumers(Iterable<Consumer> consumers) {
-    return new StaticConsumerInstanceProvider(consumers);
+  public static StaticConsumersInstanceProvider ofConsumers(Iterable<QueueConsumer> consumers) {
+    return new StaticConsumersInstanceProvider(consumers);
   }
 
-  public static StaticConsumerInstanceProvider ofBeans(Iterable<Object> consumers) {
-    return new StaticConsumerInstanceProvider(StreamSupport.stream(consumers.spliterator(), false)
-      .map(StaticConsumerInstanceProvider::toConsumerByAnnotatedMethod)
+  public static StaticConsumersInstanceProvider ofBeans(Iterable<Object> consumers) {
+    return new StaticConsumersInstanceProvider(StreamSupport.stream(consumers.spliterator(), false)
+      .map(StaticConsumersInstanceProvider::toConsumerByAnnotatedMethod)
       .flatMap(List::stream)
       .collect(toList()));
   }
 
-  private static List<Consumer> toConsumerByAnnotatedMethod(Object object) {
+  private static List<QueueConsumer> toConsumerByAnnotatedMethod(Object object) {
     return getConsumersFrom(object).stream()
-      .map(method -> Consumer.of(object, method))
+      .map(method -> QueueConsumer.of(object, method))
       .collect(toList());
   }
 
@@ -47,7 +47,7 @@ public class StaticConsumerInstanceProvider implements ConsumerInstanceProvider 
   }
 
   @Override
-  public Iterable<Consumer> getConsumers() {
+  public Iterable<QueueConsumer> getConsumers() {
     return StreamSupport.stream(consumers.spliterator(), false).collect(toList());
   }
 }

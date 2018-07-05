@@ -2,7 +2,7 @@ package org.jusoft.aws.sqs.validation.rule;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.jusoft.aws.sqs.Consumer;
+import org.jusoft.aws.sqs.QueueConsumer;
 
 import static org.apache.commons.lang3.Validate.notNull;
 
@@ -10,26 +10,26 @@ public class ConsumerValidationResult {
 
   private final boolean isValid;
   private final ErrorMessage errorMessage;
-  private final Consumer consumer;
+  private final QueueConsumer queueConsumer;
 
-  private ConsumerValidationResult(boolean isValid, ErrorMessage errorMessage, Consumer consumer) {
+  private ConsumerValidationResult(boolean isValid, ErrorMessage errorMessage, QueueConsumer queueConsumer) {
     this.isValid = isValid;
     this.errorMessage = errorMessage;
-    this.consumer = consumer;
+    this.queueConsumer = queueConsumer;
     notNull(this.errorMessage);
-    notNull(this.consumer);
+    notNull(this.queueConsumer);
   }
 
-  public static ConsumerValidationResult of(ErrorMessage message, Consumer consumer) {
-    return of(!message.hasErrors(), message, consumer);
+  public static ConsumerValidationResult of(ErrorMessage message, QueueConsumer queueConsumer) {
+    return of(!message.hasErrors(), message, queueConsumer);
   }
 
-  public static ConsumerValidationResult of(boolean isValid, Consumer consumer, String message, Object... parameters) {
-    return of(isValid, ErrorMessage.of(message, parameters), consumer);
+  public static ConsumerValidationResult of(boolean isValid, QueueConsumer queueConsumer, String message, Object... parameters) {
+    return of(isValid, ErrorMessage.of(message, parameters), queueConsumer);
   }
 
-  public static ConsumerValidationResult of(boolean isValid, ErrorMessage message, Consumer consumer) {
-    return new ConsumerValidationResult(isValid, message, consumer);
+  public static ConsumerValidationResult of(boolean isValid, ErrorMessage message, QueueConsumer queueConsumer) {
+    return new ConsumerValidationResult(isValid, message, queueConsumer);
   }
 
   public boolean isValid() {
@@ -40,8 +40,8 @@ public class ConsumerValidationResult {
     return errorMessage.getMessage();
   }
 
-  public Consumer getConsumer() {
-    return consumer;
+  public QueueConsumer getQueueConsumer() {
+    return queueConsumer;
   }
 
   @Override
@@ -59,7 +59,7 @@ public class ConsumerValidationResult {
     return new EqualsBuilder()
       .append(isValid, that.isValid)
       .append(errorMessage, that.errorMessage)
-      .append(consumer, that.consumer)
+      .append(queueConsumer, that.queueConsumer)
       .isEquals();
   }
 
@@ -68,7 +68,7 @@ public class ConsumerValidationResult {
     return new HashCodeBuilder(17, 37)
       .append(isValid)
       .append(errorMessage)
-      .append(consumer)
+      .append(queueConsumer)
       .toHashCode();
   }
 
@@ -77,7 +77,7 @@ public class ConsumerValidationResult {
     return "ConsumerValidationResult{" +
       "isValid=" + isValid +
       ", errorMessage=" + errorMessage +
-      ", consumer=" + consumer +
+      ", queueConsumer=" + queueConsumer +
       '}';
   }
 }

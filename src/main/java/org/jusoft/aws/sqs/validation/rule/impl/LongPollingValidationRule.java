@@ -1,6 +1,6 @@
 package org.jusoft.aws.sqs.validation.rule.impl;
 
-import org.jusoft.aws.sqs.Consumer;
+import org.jusoft.aws.sqs.QueueConsumer;
 import org.jusoft.aws.sqs.annotation.SqsConsumer;
 import org.jusoft.aws.sqs.validation.rule.ConsumerValidationResult;
 import org.jusoft.aws.sqs.validation.rule.ErrorMessage;
@@ -14,11 +14,11 @@ public class LongPollingValidationRule implements ValidationRule {
   static final String MAXIMUM_LONG_POLLING_VALUE_ERROR = "Maximum long polling value is %s. Queue=%s";
 
   @Override
-  public ConsumerValidationResult validate(Consumer consumer) {
+  public ConsumerValidationResult validate(QueueConsumer queueConsumer) {
     ErrorMessage errorMessage = ErrorMessage.noError()
-      .addMessage(isMinimumLongPollingRespectedFor(consumer.getAnnotation()))
-      .addMessage(isMaximumLongPollingRespectedFor(consumer.getAnnotation()));
-    return ConsumerValidationResult.of(errorMessage, consumer);
+      .addMessage(isMinimumLongPollingRespectedFor(queueConsumer.getAnnotation()))
+      .addMessage(isMaximumLongPollingRespectedFor(queueConsumer.getAnnotation()));
+    return ConsumerValidationResult.of(errorMessage, queueConsumer);
   }
 
   private ErrorMessage isMinimumLongPollingRespectedFor(SqsConsumer annotation) {

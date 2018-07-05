@@ -1,7 +1,7 @@
 package org.jusoft.aws.sqs.provider;
 
 import org.junit.Test;
-import org.jusoft.aws.sqs.Consumer;
+import org.jusoft.aws.sqs.QueueConsumer;
 import org.jusoft.aws.sqs.annotation.SqsConsumer;
 
 import java.lang.reflect.Method;
@@ -9,20 +9,20 @@ import java.lang.reflect.Method;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
-public class StaticConsumerInstanceProviderTest {
+public class StaticQueueConsumersInstanceProviderTest {
 
   private static final String QUEUE_NAME = "queueName";
 
   @Test
   public void whenProviderCreatedWithConsumersThenProviderShouldReturnSameConsumers() throws NoSuchMethodException {
-    Consumer consumerOne = Consumer.of(new TestConsumerOne(), getConsumerFrom(TestConsumerOne.class));
+    QueueConsumer queueConsumerOne = QueueConsumer.of(new TestConsumerOne(), getConsumerFrom(TestConsumerOne.class));
     TestConsumerTwo testConsumer = new TestConsumerTwo();
-    Consumer consumerTwo = Consumer.of(testConsumer, getConsumerFrom(TestConsumerTwo.class));
-    Consumer consumerThree = Consumer.of(testConsumer, getConsumerFrom(TestConsumerTwo.class, "testConsumerTwo"));
+    QueueConsumer queueConsumerTwo = QueueConsumer.of(testConsumer, getConsumerFrom(TestConsumerTwo.class));
+    QueueConsumer queueConsumerThree = QueueConsumer.of(testConsumer, getConsumerFrom(TestConsumerTwo.class, "testConsumerTwo"));
 
-    ConsumerInstanceProvider provider = StaticConsumerInstanceProvider.ofConsumers(asList(consumerOne, consumerTwo, consumerThree));
+    ConsumersInstanceProvider provider = StaticConsumersInstanceProvider.ofConsumers(asList(queueConsumerOne, queueConsumerTwo, queueConsumerThree));
 
-    assertThat(provider.getConsumers()).containsExactlyInAnyOrder(consumerOne, consumerTwo, consumerThree);
+    assertThat(provider.getConsumers()).containsExactlyInAnyOrder(queueConsumerOne, queueConsumerTwo, queueConsumerThree);
   }
 
   @Test
@@ -30,12 +30,12 @@ public class StaticConsumerInstanceProviderTest {
     TestConsumerOne testConsumerOne = new TestConsumerOne();
     TestConsumerTwo testConsumerTwo = new TestConsumerTwo();
 
-    ConsumerInstanceProvider provider = StaticConsumerInstanceProvider.ofBeans(asList(testConsumerOne, testConsumerTwo));
+    ConsumersInstanceProvider provider = StaticConsumersInstanceProvider.ofBeans(asList(testConsumerOne, testConsumerTwo));
 
-    Consumer consumerOne = Consumer.of(testConsumerOne, getConsumerFrom(TestConsumerOne.class));
-    Consumer consumerTwo = Consumer.of(testConsumerTwo, getConsumerFrom(TestConsumerTwo.class));
-    Consumer consumerThree = Consumer.of(testConsumerTwo, getConsumerFrom(TestConsumerTwo.class, "testConsumerTwo"));
-    assertThat(provider.getConsumers()).containsExactlyInAnyOrder(consumerOne, consumerTwo, consumerThree);
+    QueueConsumer queueConsumerOne = QueueConsumer.of(testConsumerOne, getConsumerFrom(TestConsumerOne.class));
+    QueueConsumer queueConsumerTwo = QueueConsumer.of(testConsumerTwo, getConsumerFrom(TestConsumerTwo.class));
+    QueueConsumer queueConsumerThree = QueueConsumer.of(testConsumerTwo, getConsumerFrom(TestConsumerTwo.class, "testConsumerTwo"));
+    assertThat(provider.getConsumers()).containsExactlyInAnyOrder(queueConsumerOne, queueConsumerTwo, queueConsumerThree);
   }
 
   private Method getConsumerFrom(Class<?> clazz) throws NoSuchMethodException {

@@ -1,6 +1,6 @@
 package org.jusoft.aws.sqs.validation.rule.impl;
 
-import org.jusoft.aws.sqs.Consumer;
+import org.jusoft.aws.sqs.QueueConsumer;
 import org.jusoft.aws.sqs.annotation.SqsConsumer;
 import org.jusoft.aws.sqs.validation.rule.ConsumerValidationResult;
 import org.jusoft.aws.sqs.validation.rule.ErrorMessage;
@@ -14,8 +14,8 @@ public class ConcurrentConsumersValidationRule implements ValidationRule {
   private static final int MINIMUM_CONCURRENT_CONSUMERS = 0;
 
   @Override
-  public ConsumerValidationResult validate(Consumer consumer) {
-    return ConsumerValidationResult.of(isMinimumConcurrentConsumersRespected(consumer.getAnnotation()), consumer);
+  public ConsumerValidationResult validate(QueueConsumer queueConsumer) {
+    return ConsumerValidationResult.of(isMinimumConcurrentConsumersRespected(queueConsumer.getAnnotation()), queueConsumer);
   }
 
   private ErrorMessage isMinimumConcurrentConsumersRespected(SqsConsumer annotation) {

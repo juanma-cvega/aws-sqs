@@ -8,18 +8,18 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
-public class Consumer {
+public class QueueConsumer {
 
   private final Object consumerInstance;
   private final Method consumerMethod;
 
-  private Consumer(Object consumerInstance, Method consumerMethod) {
+  private QueueConsumer(Object consumerInstance, Method consumerMethod) {
     this.consumerInstance = consumerInstance;
     this.consumerMethod = consumerMethod;
   }
 
-  public static Consumer of(Object consumerInstance, Method consumerMethod) {
-    return new Consumer(consumerInstance, consumerMethod);
+  public static QueueConsumer of(Object consumerInstance, Method consumerMethod) {
+    return new QueueConsumer(consumerInstance, consumerMethod);
   }
 
   public Object getConsumerInstance() {
@@ -48,11 +48,11 @@ public class Consumer {
       return false;
     }
 
-    Consumer consumer = (Consumer) o;
+    QueueConsumer queueConsumer = (QueueConsumer) o;
 
     return new EqualsBuilder()
-      .append(consumerInstance, consumer.consumerInstance)
-      .append(consumerMethod, consumer.consumerMethod)
+      .append(consumerInstance, queueConsumer.consumerInstance)
+      .append(consumerMethod, queueConsumer.consumerMethod)
       .isEquals();
   }
 
@@ -66,7 +66,7 @@ public class Consumer {
 
   @Override
   public String toString() {
-    return "Consumer{" +
+    return "QueueConsumer{" +
       "consumerInstance=" + consumerInstance +
       ", consumerMethod=" + consumerMethod +
       '}';

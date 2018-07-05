@@ -1,6 +1,6 @@
 package org.jusoft.aws.sqs.validation.rule.impl;
 
-import org.jusoft.aws.sqs.Consumer;
+import org.jusoft.aws.sqs.QueueConsumer;
 import org.jusoft.aws.sqs.annotation.SqsAttribute;
 import org.jusoft.aws.sqs.annotation.SqsBody;
 import org.jusoft.aws.sqs.validation.rule.ConsumerValidationResult;
@@ -23,22 +23,22 @@ public class ParametersAnnotationsValidationRule implements ValidationRule {
   private static final int ALLOWED_ANNOTATIONS_PER_PARAMETER = 1;
 
   @Override
-  public ConsumerValidationResult validate(Consumer consumer) {
+  public ConsumerValidationResult validate(QueueConsumer queueConsumer) {
     ErrorMessage errorMessage = noError();
-    if (consumer.getParametersTypes().size() == 1) {
-      errorMessage.addMessage(validateOnlyParameterIsBody(consumer));
-    } else if (isParametersSizeValid(consumer.getParametersTypes())) {
-      errorMessage.addMessage(validateAllConsumerParametersHaveValidAnnotations(consumer));
+    if (queueConsumer.getParametersTypes().size() == 1) {
+      errorMessage.addMessage(validateOnlyParameterIsBody(queueConsumer));
+    } else if (isParametersSizeValid(queueConsumer.getParametersTypes())) {
+      errorMessage.addMessage(validateAllConsumerParametersHaveValidAnnotations(queueConsumer));
     }
-    return ConsumerValidationResult.of(errorMessage, consumer);
+    return ConsumerValidationResult.of(errorMessage, queueConsumer);
   }
 
-  private ErrorMessage validateOnlyParameterIsBody(Consumer consumer) {
-    return ErrorMessage.of(() -> isSqsAttributeNotPresentForAnyParameter(consumer), SINGLE_PARAMETER_NOT_BODY_ERROR, consumer.getAnnotation().value());
+  private ErrorMessage validateOnlyParameterIsBody(QueueConsumer queueConsumer) {
+    return ErrorMessage.of(() -> isSqsAttributeNotPresentForAnyParameter(queueConsumer), SINGLE_PARAMETER_NOT_BODY_ERROR, queueConsumer.getAnnotation().value());
   }
 
-  private boolean isSqsAttributeNotPresentForAnyParameter(Consumer consumer) {
-    return Stream.of(consumer.getConsumerMethod().getParameterAnnotations())
+  private boolean isSqsAttributeNotPresentForAnyParameter(QueueConsumer queueConsumer) {
+    return Stream.of(queueConsumer.getConsumerMethod().getParameterAnnotations())
       .allMatch(this::isSqsAttributeNotPresent);
   }
 
@@ -51,21 +51,21 @@ public class ParametersAnnotationsValidationRule implements ValidationRule {
     return !parametersType.isEmpty();
   }
 
-  private ErrorMessage validateAllConsumerParametersHaveValidAnnotations(Consumer consumer) {
+  private ErrorMessage validateAllConsumerParametersHaveValidAnnotations(QueueConsumer queueConsumer) {
     ErrorMessage errorMessage = noError();
-    errorMessage.addMessage(ErrorMessage.of(isSqsAnnotationNotRepeatedFor(consumer), PARAMETER_ANNOTATION_NUMBER_RESTRICTION_ERROR, consumer.getAnnotation().value()));
-    errorMessage.addMessage(ErrorMessage.of(isSqsBodyAnnotationOnlyOnceFor(consumer), MULTIPLE_SQS_BODY_ANNOTATIONS_ERROR, consumer.getAnnotation().value()));
+    errorMessage.addMessage(ErrorMessage.of(isSqsAnnotationNotRepeatedFor(queueConsumer), PARAMETER_ANNOTATION_NUMBER_RESTRICTION_ERROR, queueConsumer.getAnnotation().value()));
+    errorMessage.addMessage(ErrorMessage.of(isSqsBodyAnnotationOnlyOnceFor(queueConsumer), MULTIPLE_SQS_BODY_ANNOTATIONS_ERROR, queueConsumer.getAnnotation().value()));
     return errorMessage;
   }
 
-  private Supplier<Boolean> isSqsAnnotationNotRepeatedFor(Consumer consumer) {
-    return () -> Stream.of(consumer.getConsumerMethod().getParameterAnnotations())
+  private Supplier<Boolean> isSqsAnnotationNotRepeatedFor(QueueConsumer queueConsumer) {
+    return () -> Stream.of(queueConsumer.getConsumerMethod().getParameterAnnotations())
       .map(this::countSqsAnnotationOn)
       .noneMatch(sqsAnnotationsPerParameter -> sqsAnnotationsPerParameter != ALLOWED_ANNOTATIONS_PER_PARAMETER);
   }
 
-  private Supplier<Boolean> isSqsBodyAnnotationOnlyOnceFor(Consumer consumer) {
-    return () -> Stream.of(consumer.getConsumerMethod().getParameterAnnotations())
+  private Supplier<Boolean> isSqsBodyAnnotationOnlyOnceFor(QueueConsumer queueConsumer) {
+    return () -> Stream.of(queueConsumer.getConsumerMethod().getParameterAnnotations())
       .filter(this::containsSqsBodyAnnotation)
       .count() == 1;
   }

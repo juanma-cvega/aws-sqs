@@ -1,6 +1,6 @@
 package org.jusoft.aws.sqs.validation.rule.impl;
 
-import org.jusoft.aws.sqs.Consumer;
+import org.jusoft.aws.sqs.QueueConsumer;
 import org.jusoft.aws.sqs.validation.rule.ConsumerValidationResult;
 import org.jusoft.aws.sqs.validation.rule.ErrorMessage;
 import org.jusoft.aws.sqs.validation.rule.ValidationRule;
@@ -10,14 +10,14 @@ public class ConsumerParametersValidationRule implements ValidationRule {
   private static final int MINIMUM_PARAMETERS = 0;
 
   @Override
-  public ConsumerValidationResult validate(Consumer consumer) {
-    ErrorMessage errorMessage = isMinimumConcurrentConsumersRespected(consumer);
-    return ConsumerValidationResult.of(errorMessage, consumer);
+  public ConsumerValidationResult validate(QueueConsumer queueConsumer) {
+    ErrorMessage errorMessage = isMinimumConcurrentConsumersRespected(queueConsumer);
+    return ConsumerValidationResult.of(errorMessage, queueConsumer);
   }
 
-  private ErrorMessage isMinimumConcurrentConsumersRespected(Consumer consumer) {
-    return consumer.getParametersTypes().size() > MINIMUM_PARAMETERS
+  private ErrorMessage isMinimumConcurrentConsumersRespected(QueueConsumer queueConsumer) {
+    return queueConsumer.getParametersTypes().size() > MINIMUM_PARAMETERS
       ? ErrorMessage.noError()
-      : ErrorMessage.of(MINIMUM_PARAMETERS_VALUE_ERROR, consumer.getAnnotation().value());
+      : ErrorMessage.of(MINIMUM_PARAMETERS_VALUE_ERROR, queueConsumer.getAnnotation().value());
   }
 }

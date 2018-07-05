@@ -2,7 +2,7 @@ package org.jusoft.aws.sqs.executor;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.jusoft.aws.sqs.Consumer;
+import org.jusoft.aws.sqs.QueueConsumer;
 import org.jusoft.aws.sqs.annotation.SqsConsumer;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -15,17 +15,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 @RunWith(MockitoJUnitRunner.class)
 public class SqsFixedExecutorFactoryTest {
 
-  private final SqsFixedExecutorFactory sqsFixedExecutorFactory = new SqsFixedExecutorFactory();
+  private final FixedExecutorFactory sqsFixedExecutorFactory = new FixedExecutorFactory();
 
   @Test
   public void shouldCreateExecutorBasedOnNumberOfConsumersByTheirConcurrentValue() throws NoSuchMethodException {
-    Consumer firstConsumerTestClassOne = Consumer.of(new TestClassOne(), TestClassOne.class.getMethod("test"));
-    Consumer secondConsumerTestClassOne = Consumer.of(new TestClassOne(), TestClassOne.class.getMethod("test2"));
-    Consumer firstConsumerTestClassTwo = Consumer.of(new TestClassTwo(), TestClassTwo.class.getMethod("test3"));
-    Consumer secondConsumerTestClassTwo = Consumer.of(new TestClassTwo(), TestClassTwo.class.getMethod("test4"));
-    List<Consumer> consumers = Arrays.asList(firstConsumerTestClassOne, secondConsumerTestClassOne, firstConsumerTestClassTwo, secondConsumerTestClassTwo);
+    QueueConsumer firstQueueConsumerTestClassOne = QueueConsumer.of(new TestClassOne(), TestClassOne.class.getMethod("test"));
+    QueueConsumer secondQueueConsumerTestClassOne = QueueConsumer.of(new TestClassOne(), TestClassOne.class.getMethod("test2"));
+    QueueConsumer firstQueueConsumerTestClassTwo = QueueConsumer.of(new TestClassTwo(), TestClassTwo.class.getMethod("test3"));
+    QueueConsumer secondQueueConsumerTestClassTwo = QueueConsumer.of(new TestClassTwo(), TestClassTwo.class.getMethod("test4"));
+    List<QueueConsumer> queueConsumers = Arrays.asList(firstQueueConsumerTestClassOne, secondQueueConsumerTestClassOne, firstQueueConsumerTestClassTwo, secondQueueConsumerTestClassTwo);
 
-    ThreadPoolExecutor executor = (ThreadPoolExecutor) sqsFixedExecutorFactory.createFor(consumers);
+    ThreadPoolExecutor executor = (ThreadPoolExecutor) sqsFixedExecutorFactory.createFor(queueConsumers);
     assertThat(executor.getCorePoolSize()).isEqualTo(8);
   }
 

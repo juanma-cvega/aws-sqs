@@ -17,7 +17,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RuleBasedConsumerValidatorFactoryTest {
+public class RuleBasedQueueConsumerValidatorFactoryTest {
 
   @Mock
   private RulesProvider rulesProvider;

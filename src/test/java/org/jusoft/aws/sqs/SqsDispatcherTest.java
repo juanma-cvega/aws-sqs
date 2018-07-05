@@ -15,10 +15,11 @@ import org.jusoft.aws.sqs.annotation.DeletePolicy;
 import org.jusoft.aws.sqs.annotation.SqsAttribute;
 import org.jusoft.aws.sqs.annotation.SqsBody;
 import org.jusoft.aws.sqs.annotation.SqsConsumer;
-import org.jusoft.aws.sqs.executor.SqsExecutorFactory;
+import org.jusoft.aws.sqs.executor.ExecutorFactory;
+import org.jusoft.aws.sqs.mapper.ConsumerParametersMapper;
 import org.jusoft.aws.sqs.mapper.JacksonMessageMapper;
-import org.jusoft.aws.sqs.provider.ConsumerInstanceProvider;
-import org.jusoft.aws.sqs.service.DeleteMessageService;
+import org.jusoft.aws.sqs.provider.ConsumersInstanceProvider;
+import org.jusoft.aws.sqs.service.MessageConsumerService;
 import org.jusoft.aws.sqs.validation.ConsumerValidator;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -37,7 +38,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.function.Function;
+import java.util.function.Consumer;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -79,31 +80,32 @@ public class SqsDispatcherTest {
   }
 
   @Mock
-  private ConsumerInstanceProvider consumerInstanceProvider;
+  private ConsumersInstanceProvider consumersInstanceProvider;
   @Mock
   private ConsumerValidator consumerValidator;
+  private final ConsumerParametersMapper consumerParametersMapper = new ConsumerParametersMapper(new JacksonMessageMapper(new ObjectMapper()));
   @Mock
   private AmazonSQS amazonSQS;
   @Spy
-  private final SqsSyncExecutionFactory sqsExecutionFactory = new SqsSyncExecutionFactory();
+  private final SyncExecutionFactory sqsExecutionFactory = new SyncExecutionFactory();
   @Captor
   private ArgumentCaptor<ReceiveMessageRequest> receiveMessageCaptor;
 
-  private DeleteMessageServiceMock deleteMessageService;
+  private final MessageConsumerServiceMock deleteMessageService = new MessageConsumerServiceMock();
   private SqsDispatcher sqsDispatcher;
 
   @Before
   public void setup() {
-    deleteMessageService = new DeleteMessageServiceMock();
-    sqsDispatcher = new SqsDispatcher(amazonSQS, new JacksonMessageMapper(new ObjectMapper()), deleteMessageService, consumerInstanceProvider, sqsExecutionFactory, consumerValidator);
+    ReceiveMessageRequestFactory receiveMessageRequestFactory = new ReceiveMessageRequestFactory(amazonSQS);
+    sqsDispatcher = new SqsDispatcher(amazonSQS, consumerParametersMapper, deleteMessageService, consumersInstanceProvider, sqsExecutionFactory, consumerValidator, receiveMessageRequestFactory);
   }
 
   @Test
   public void whenAnyMessageIsConsumedThenTheConsumerShouldBeCalledAndTheMessageDeletedFromSqs() throws NoSuchMethodException {
-    TestValidConsumer testObject = new TestValidConsumer();
-    Consumer consumer = Consumer.of(testObject, testObject.getMethod());
-    List<Consumer> consumers = singletonList(consumer);
-    when(consumerInstanceProvider.getConsumers()).thenReturn(consumers);
+    TestValidQueueConsumer testObject = new TestValidQueueConsumer();
+    QueueConsumer queueConsumer = QueueConsumer.of(testObject, testObject.getMethod());
+    List<QueueConsumer> queueConsumers = singletonList(queueConsumer);
+    when(consumersInstanceProvider.getConsumers()).thenReturn(queueConsumers);
     when(amazonSQS.getQueueUrl(QUEUE_NAME)).thenReturn(new GetQueueUrlResult().withQueueUrl(QUEUE_URL));
     when(amazonSQS.receiveMessage(receiveMessageCaptor.capture()))
       .thenReturn(RECEIVE_MESSAGE_RESULT)
@@ -118,16 +120,16 @@ public class SqsDispatcherTest {
     assertThat(request.getWaitTimeSeconds()).isEqualTo(DEFAULT_MAX_LONG_POLLING_IN_SECONDS);
     assertThat(request.getQueueUrl()).isEqualTo(QUEUE_URL);
 
-    assertThat(deleteMessageService.isCalledAndResultConsumer).isNotNull().isTrue();
-    verify(consumerValidator).isValid(consumers);
+    assertThat(deleteMessageService.isCalledConsumerAndResultOk).isNotNull().isTrue();
+    verify(consumerValidator).isValid(queueConsumers);
   }
 
   @Test
   public void whenAnyMessageIsConsumedByConsumerWithListArgumentThenItShouldBeCalledWithListArgumentAndTheMessageDeletedFromSqs() throws NoSuchMethodException {
-    TestListArgumentConsumer testObject = new TestListArgumentConsumer();
-    Consumer consumer = Consumer.of(testObject, testObject.getMethod());
-    List<Consumer> consumers = singletonList(consumer);
-    when(consumerInstanceProvider.getConsumers()).thenReturn(consumers);
+    TestListArgumentQueueConsumer testObject = new TestListArgumentQueueConsumer();
+    QueueConsumer queueConsumer = QueueConsumer.of(testObject, testObject.getMethod());
+    List<QueueConsumer> queueConsumers = singletonList(queueConsumer);
+    when(consumersInstanceProvider.getConsumers()).thenReturn(queueConsumers);
     when(amazonSQS.getQueueUrl(QUEUE_NAME)).thenReturn(new GetQueueUrlResult().withQueueUrl(QUEUE_URL));
     when(amazonSQS.receiveMessage(receiveMessageCaptor.capture()))
       .thenReturn(RECEIVE_MESSAGE_RESULT)
@@ -142,16 +144,16 @@ public class SqsDispatcherTest {
     assertThat(request.getWaitTimeSeconds()).isEqualTo(DEFAULT_MAX_LONG_POLLING_IN_SECONDS);
     assertThat(request.getQueueUrl()).isEqualTo(QUEUE_URL);
 
-    assertThat(deleteMessageService.isCalledAndResultConsumer).isNotNull().isTrue();
-    verify(consumerValidator).isValid(consumers);
+    assertThat(deleteMessageService.isCalledConsumerAndResultOk).isNotNull().isTrue();
+    verify(consumerValidator).isValid(queueConsumers);
   }
 
   @Test
   public void whenAnyMessageIsConsumedByConsumerWithBodyAndOneAttributeThenItShouldBeCalledWithBodyAndAttributeFromMessage() throws NoSuchMethodException {
-    TestAttributeConsumer testObject = new TestAttributeConsumer();
-    Consumer consumer = Consumer.of(testObject, testObject.getMethod());
-    List<Consumer> consumers = singletonList(consumer);
-    when(consumerInstanceProvider.getConsumers()).thenReturn(consumers);
+    TestAttributeQueueConsumer testObject = new TestAttributeQueueConsumer();
+    QueueConsumer queueConsumer = QueueConsumer.of(testObject, testObject.getMethod());
+    List<QueueConsumer> queueConsumers = singletonList(queueConsumer);
+    when(consumersInstanceProvider.getConsumers()).thenReturn(queueConsumers);
     when(amazonSQS.getQueueUrl(QUEUE_NAME)).thenReturn(new GetQueueUrlResult().withQueueUrl(QUEUE_URL));
     when(amazonSQS.receiveMessage(receiveMessageCaptor.capture()))
       .thenReturn(RECEIVE_MESSAGE_RESULT)
@@ -167,16 +169,16 @@ public class SqsDispatcherTest {
     assertThat(request.getWaitTimeSeconds()).isEqualTo(DEFAULT_MAX_LONG_POLLING_IN_SECONDS);
     assertThat(request.getQueueUrl()).isEqualTo(QUEUE_URL);
 
-    assertThat(deleteMessageService.isCalledAndResultConsumer).isNotNull().isTrue();
-    verify(consumerValidator).isValid(consumers);
+    assertThat(deleteMessageService.isCalledConsumerAndResultOk).isNotNull().isTrue();
+    verify(consumerValidator).isValid(queueConsumers);
   }
 
   @Test
   public void whenAnyMessageIsConsumedByConsumerWithManyArgumentsThenItShouldBeCalledWithBodyAndAttributesFromMessage() throws NoSuchMethodException {
-    TestAttributesConsumer testObject = new TestAttributesConsumer();
-    Consumer consumer = Consumer.of(testObject, testObject.getMethod());
-    List<Consumer> consumers = singletonList(consumer);
-    when(consumerInstanceProvider.getConsumers()).thenReturn(consumers);
+    TestAttributesQueueConsumer testObject = new TestAttributesQueueConsumer();
+    QueueConsumer queueConsumer = QueueConsumer.of(testObject, testObject.getMethod());
+    List<QueueConsumer> queueConsumers = singletonList(queueConsumer);
+    when(consumersInstanceProvider.getConsumers()).thenReturn(queueConsumers);
     when(amazonSQS.getQueueUrl(QUEUE_NAME)).thenReturn(new GetQueueUrlResult().withQueueUrl(QUEUE_URL));
     when(amazonSQS.receiveMessage(receiveMessageCaptor.capture()))
       .thenReturn(RECEIVE_MESSAGE_RESULT)
@@ -193,8 +195,8 @@ public class SqsDispatcherTest {
     assertThat(request.getWaitTimeSeconds()).isEqualTo(DEFAULT_MAX_LONG_POLLING_IN_SECONDS);
     assertThat(request.getQueueUrl()).isEqualTo(QUEUE_URL);
 
-    assertThat(deleteMessageService.isCalledAndResultConsumer).isNotNull().isTrue();
-    verify(consumerValidator).isValid(consumers);
+    assertThat(deleteMessageService.isCalledConsumerAndResultOk).isNotNull().isTrue();
+    verify(consumerValidator).isValid(queueConsumers);
   }
 
   @Test
@@ -204,10 +206,10 @@ public class SqsDispatcherTest {
 
   @Test
   public void whenThereIsAnExceptionWhileConsumingThenConsumerShouldContinueConsuming() throws NoSuchMethodException {
-    TestValidConsumer testObject = new TestValidConsumer();
-    Consumer consumer = Consumer.of(testObject, testObject.getMethod());
-    List<Consumer> consumers = singletonList(consumer);
-    when(consumerInstanceProvider.getConsumers()).thenReturn(consumers);
+    TestValidQueueConsumer testObject = new TestValidQueueConsumer();
+    QueueConsumer queueConsumer = QueueConsumer.of(testObject, testObject.getMethod());
+    List<QueueConsumer> queueConsumers = singletonList(queueConsumer);
+    when(consumersInstanceProvider.getConsumers()).thenReturn(queueConsumers);
     when(amazonSQS.getQueueUrl(QUEUE_NAME)).thenReturn(new GetQueueUrlResult().withQueueUrl(QUEUE_URL));
     when(amazonSQS.receiveMessage(receiveMessageCaptor.capture()))
       .thenAnswer(invocation -> {
@@ -217,16 +219,16 @@ public class SqsDispatcherTest {
 
     sqsDispatcher.subscribeConsumers();
 
-    assertThat(deleteMessageService.isCalledAndResultConsumer).isNotNull().isTrue();
-    verify(consumerValidator).isValid(consumers);
+    assertThat(deleteMessageService.isCalledConsumerAndResultOk).isNotNull().isTrue();
+    verify(consumerValidator).isValid(queueConsumers);
   }
 
   @Test
   public void whenConsumersAreTerminatedThenLastExecutionIsFinishedBeforeClosing() throws NoSuchMethodException {
     CounterObject testObject = new CounterObject();
-    Consumer consumer = Consumer.of(testObject, testObject.getMethod());
-    List<Consumer> consumers = singletonList(consumer);
-    when(consumerInstanceProvider.getConsumers()).thenReturn(consumers);
+    QueueConsumer queueConsumer = QueueConsumer.of(testObject, testObject.getMethod());
+    List<QueueConsumer> queueConsumers = singletonList(queueConsumer);
+    when(consumersInstanceProvider.getConsumers()).thenReturn(queueConsumers);
     when(amazonSQS.getQueueUrl(QUEUE_NAME)).thenReturn(new GetQueueUrlResult().withQueueUrl(QUEUE_URL));
     when(amazonSQS.receiveMessage(receiveMessageCaptor.capture()))
       .thenReturn(RECEIVE_MESSAGE_RESULT)
@@ -238,15 +240,15 @@ public class SqsDispatcherTest {
     sqsDispatcher.subscribeConsumers();
 
     assertThat(testObject.count).isEqualTo(2);
-    verify(consumerValidator).isValid(consumers);
+    verify(consumerValidator).isValid(queueConsumers);
   }
 
   @Test
-  public void whenInvocationFailsThenDeleteMessageServiceShouldReceiveFailAsResultOfConsumingMessage() throws NoSuchMethodException {
+  public void whenInvocationFailsThenDeleteMessageServiceShouldNotFinishExecution() throws NoSuchMethodException {
     ExceptionObject testObject = new ExceptionObject();
-    Consumer consumer = Consumer.of(testObject, testObject.getMethod());
-    List<Consumer> consumers = singletonList(consumer);
-    when(consumerInstanceProvider.getConsumers()).thenReturn(consumers);
+    QueueConsumer queueConsumer = QueueConsumer.of(testObject, testObject.getMethod());
+    List<QueueConsumer> queueConsumers = singletonList(queueConsumer);
+    when(consumersInstanceProvider.getConsumers()).thenReturn(queueConsumers);
     when(amazonSQS.getQueueUrl(QUEUE_NAME)).thenReturn(new GetQueueUrlResult().withQueueUrl(QUEUE_URL));
     when(amazonSQS.receiveMessage(receiveMessageCaptor.capture()))
       .thenReturn(RECEIVE_MESSAGE_RESULT)
@@ -254,33 +256,38 @@ public class SqsDispatcherTest {
 
     sqsDispatcher.subscribeConsumers();
 
-    assertThat(deleteMessageService.isCalledAndResultConsumer).isNotNull().isFalse();
-    verify(consumerValidator).isValid(consumers);
+    assertThat(deleteMessageService.isCalledConsumerAndResultOk).isNotNull().isFalse();
+    verify(consumerValidator).isValid(queueConsumers);
   }
 
   @Test
   public void whenValidationOfAnyConsumerFailsThenThereShouldBeAnException() throws NoSuchMethodException {
     ExceptionObject testObject = new ExceptionObject();
-    Consumer consumer = Consumer.of(testObject, testObject.getMethod());
-    when(consumerInstanceProvider.getConsumers()).thenReturn(singletonList(consumer));
+    QueueConsumer queueConsumer = QueueConsumer.of(testObject, testObject.getMethod());
+    when(consumersInstanceProvider.getConsumers()).thenReturn(singletonList(queueConsumer));
     IllegalArgumentException exceptionThrown = new IllegalArgumentException();
-    doThrow(exceptionThrown).when(consumerValidator).isValid(singletonList(consumer));
+    doThrow(exceptionThrown).when(consumerValidator).isValid(singletonList(queueConsumer));
 
     assertThatThrownBy(() -> sqsDispatcher.subscribeConsumers()).isEqualTo(exceptionThrown);
     verifyZeroInteractions(amazonSQS);
   }
 
-  private static class DeleteMessageServiceMock implements DeleteMessageService {
+  private static class MessageConsumerServiceMock implements MessageConsumerService {
 
-    private Boolean isCalledAndResultConsumer = null;
+    private Boolean isCalledConsumerAndResultOk = null;
 
     @Override
-    public void deleteMessage(DeletePolicy deletePolicy, ReceiveMessageResult receiveMessageResult, String queueUrl, Function<ReceiveMessageResult, Boolean> messageConsumer) {
-      isCalledAndResultConsumer = messageConsumer.apply(receiveMessageResult);
+    public void consumeAndDeleteMessage(DeletePolicy deletePolicy, ReceiveMessageResult receiveMessageResult, String queueUrl, Consumer<ReceiveMessageResult> messageConsumer) {
+      try {
+        messageConsumer.accept(receiveMessageResult);
+        isCalledConsumerAndResultOk = true;
+      } catch (Exception e) {
+        isCalledConsumerAndResultOk = false;
+      }
     }
   }
 
-  private class TestValidConsumer {
+  private class TestValidQueueConsumer {
     private TestDto testValue;
 
     @SqsConsumer(value = QUEUE_NAME)
@@ -294,7 +301,7 @@ public class SqsDispatcherTest {
     }
   }
 
-  private class TestListArgumentConsumer {
+  private class TestListArgumentQueueConsumer {
     private List<TestDto> testValue;
 
     @SqsConsumer(value = QUEUE_NAME)
@@ -308,7 +315,7 @@ public class SqsDispatcherTest {
     }
   }
 
-  private class TestAttributeConsumer {
+  private class TestAttributeQueueConsumer {
     private TestDto testValue;
     private String testAttribute;
 
@@ -324,7 +331,7 @@ public class SqsDispatcherTest {
     }
   }
 
-  private class TestAttributesConsumer {
+  private class TestAttributesQueueConsumer {
     private TestDto testValue;
     private String testAttribute1;
     private String testAttribute2;
@@ -408,9 +415,9 @@ public class SqsDispatcherTest {
     }
   }
 
-  private static class SqsSyncExecutionFactory implements SqsExecutorFactory {
+  private static class SyncExecutionFactory implements ExecutorFactory {
     @Override
-    public ExecutorService createFor(Iterable<Consumer> consumerProperties) {
+    public ExecutorService createFor(Iterable<QueueConsumer> consumerProperties) {
       return new ExecutorService() {
         @Override
         public void shutdown() {

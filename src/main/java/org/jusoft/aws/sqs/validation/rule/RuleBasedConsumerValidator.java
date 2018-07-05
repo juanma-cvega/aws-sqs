@@ -1,7 +1,7 @@
 package org.jusoft.aws.sqs.validation.rule;
 
 import org.apache.commons.lang3.Validate;
-import org.jusoft.aws.sqs.Consumer;
+import org.jusoft.aws.sqs.QueueConsumer;
 import org.jusoft.aws.sqs.validation.ConsumerValidator;
 
 import java.util.Collection;
@@ -26,7 +26,7 @@ public class RuleBasedConsumerValidator implements ConsumerValidator {
   }
 
   @Override
-  public void isValid(Iterable<Consumer> consumers) {
+  public void isValid(Iterable<QueueConsumer> consumers) {
     Set<ConsumerValidationResult> validationResults = stream(consumers.spliterator(), false)
       .map(this::isValid)
       .flatMap(Collection::stream)
@@ -36,9 +36,9 @@ public class RuleBasedConsumerValidator implements ConsumerValidator {
     }
   }
 
-  private Set<ConsumerValidationResult> isValid(Consumer consumer) {
+  private Set<ConsumerValidationResult> isValid(QueueConsumer queueConsumer) {
     return rules.stream()
-      .map(rule -> rule.validate(consumer))
+      .map(rule -> rule.validate(queueConsumer))
       .collect(Collectors.toSet());
   }
 

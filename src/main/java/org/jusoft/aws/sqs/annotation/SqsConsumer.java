@@ -23,5 +23,8 @@ public @interface SqsConsumer {
 
   DeletePolicy deletePolicy() default DeletePolicy.AFTER_PROCESS;
 
+  //TODO add visibilityTimeout option
+
+  //TODO add attribute names
 
 }

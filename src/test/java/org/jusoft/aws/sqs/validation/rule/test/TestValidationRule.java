@@ -1,6 +1,6 @@
 package org.jusoft.aws.sqs.validation.rule.test;
 
-import org.jusoft.aws.sqs.Consumer;
+import org.jusoft.aws.sqs.QueueConsumer;
 import org.jusoft.aws.sqs.validation.rule.ConsumerValidationResult;
 import org.jusoft.aws.sqs.validation.rule.ValidationRule;
 
@@ -9,7 +9,7 @@ import org.jusoft.aws.sqs.validation.rule.ValidationRule;
  */
 public class TestValidationRule implements ValidationRule {
   @Override
-  public ConsumerValidationResult validate(Consumer consumer) {
+  public ConsumerValidationResult validate(QueueConsumer queueConsumer) {
     return null;
   }
 }

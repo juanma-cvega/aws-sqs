@@ -2,7 +2,7 @@ package org.jusoft.aws.sqs.validation.rule;
 
 import org.junit.After;
 import org.junit.Test;
-import org.jusoft.aws.sqs.Consumer;
+import org.jusoft.aws.sqs.QueueConsumer;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
@@ -18,35 +18,35 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.jusoft.aws.sqs.validation.rule.ErrorMessage.noError;
 import static org.jusoft.aws.sqs.validation.rule.RuleBasedConsumerValidator.VALIDATION_ERROR_MESSAGE;
 
-public class RuleBasedConsumerValidatorTest {
+public class RuleBasedQueueConsumerValidatorTest {
 
   private static final TestConsumer CONSUMER_INSTANCE = new TestConsumer();
   private static final Method CONSUMER_METHOD = Stream.of(CONSUMER_INSTANCE.getClass().getDeclaredMethods())
     .filter(method -> method.getName().equals("incrementCounter"))
     .findFirst()
     .orElseThrow(() -> new IllegalArgumentException("Method name not valid"));
-  private static final Consumer CONSUMER = Consumer.of(CONSUMER_INSTANCE, CONSUMER_METHOD);
-  private static final Iterable<Consumer> CONSUMERS = singletonList(CONSUMER);
+  private static final QueueConsumer QUEUE_CONSUMER = QueueConsumer.of(CONSUMER_INSTANCE, CONSUMER_METHOD);
+  private static final Iterable<QueueConsumer> CONSUMERS = singletonList(QUEUE_CONSUMER);
   private static final String ERROR_MESSAGE_VALUE = "Error";
   private static final String ERROR_MESSAGE_VALUE_2 = "Error2";
   private static final ErrorMessage ERROR_MESSAGE = ErrorMessage.of(ERROR_MESSAGE_VALUE);
   private static final ErrorMessage ERROR_MESSAGE_2 = ErrorMessage.of(ERROR_MESSAGE_VALUE_2);
   private static final ValidationRule IS_VALID_RULE = consumer -> {
     invokeConsumer(consumer);
-    return ConsumerValidationResult.of(noError(), CONSUMER);
+    return ConsumerValidationResult.of(noError(), QUEUE_CONSUMER);
   };
   private static final ValidationRule IS_NOT_VALID_RULE = consumer -> {
     invokeConsumer(consumer);
-    return ConsumerValidationResult.of(ERROR_MESSAGE, CONSUMER);
+    return ConsumerValidationResult.of(ERROR_MESSAGE, QUEUE_CONSUMER);
   };
   private static final ValidationRule IS_NOT_VALID_RULE_2 = consumer -> {
     invokeConsumer(consumer);
-    return ConsumerValidationResult.of(ERROR_MESSAGE_2, CONSUMER);
+    return ConsumerValidationResult.of(ERROR_MESSAGE_2, QUEUE_CONSUMER);
   };
 
-  private static void invokeConsumer(Consumer consumer) {
+  private static void invokeConsumer(QueueConsumer queueConsumer) {
     try {
-      consumer.getConsumerMethod().invoke(CONSUMER_INSTANCE);
+      queueConsumer.getConsumerMethod().invoke(CONSUMER_INSTANCE);
     } catch (Exception e) {
       throw new IllegalArgumentException("Not able to run the test");
     }

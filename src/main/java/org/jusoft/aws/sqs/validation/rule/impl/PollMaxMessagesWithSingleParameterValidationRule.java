@@ -1,6 +1,6 @@
 package org.jusoft.aws.sqs.validation.rule.impl;
 
-import org.jusoft.aws.sqs.Consumer;
+import org.jusoft.aws.sqs.QueueConsumer;
 import org.jusoft.aws.sqs.annotation.SqsConsumer;
 import org.jusoft.aws.sqs.validation.rule.ConsumerValidationResult;
 import org.jusoft.aws.sqs.validation.rule.ErrorMessage;
@@ -18,18 +18,18 @@ public class PollMaxMessagesWithSingleParameterValidationRule implements Validat
     "Cannot map to single instance parameter when maxMessagesPerPoll is more than 1. Queue=%s";
 
   @Override
-  public ConsumerValidationResult validate(Consumer consumer) {
+  public ConsumerValidationResult validate(QueueConsumer queueConsumer) {
     ErrorMessage errorMessage = ErrorMessage.noError();
-    if (isSingleParameterConsumer(consumer)) {
-      errorMessage = errorMessage.addMessage(isMinimumMessagesRespectedFor(consumer.getAnnotation()))
-        .addMessage(isMaximumMessagesRespectedFor(consumer.getAnnotation()))
-        .addMessage(isMessagesRespectedWhenArgumentIsAListFor(consumer));
+    if (isSingleParameterConsumer(queueConsumer)) {
+      errorMessage = errorMessage.addMessage(isMinimumMessagesRespectedFor(queueConsumer.getAnnotation()))
+        .addMessage(isMaximumMessagesRespectedFor(queueConsumer.getAnnotation()))
+        .addMessage(isMessagesRespectedWhenArgumentIsAListFor(queueConsumer));
     }
-    return ConsumerValidationResult.of(errorMessage, consumer);
+    return ConsumerValidationResult.of(errorMessage, queueConsumer);
   }
 
-  private boolean isSingleParameterConsumer(Consumer consumer) {
-    return consumer.getParametersTypes().size() == 1;
+  private boolean isSingleParameterConsumer(QueueConsumer queueConsumer) {
+    return queueConsumer.getParametersTypes().size() == 1;
   }
 
   private ErrorMessage isMinimumMessagesRespectedFor(SqsConsumer annotation) {
@@ -44,10 +44,10 @@ public class PollMaxMessagesWithSingleParameterValidationRule implements Validat
       : ErrorMessage.of(MAXIMUM_NUMBER_OF_MESSAGES_PER_POLL_ERROR, DEFAULT_MAX_MESSAGES_PER_POLL, annotation.value());
   }
 
-  private ErrorMessage isMessagesRespectedWhenArgumentIsAListFor(Consumer consumer) {
-    Class<?> parameterType = consumer.getParametersTypes().get(0);
-    return ErrorMessage.of(() -> isNotCollectionParameterWithMaxMessagesEqualToOne(parameterType, consumer.getAnnotation()),
-      NO_COLLECTION_PARAMETER_WITH_MAX_MESSAGES_GREATER_THAN_ONE_ERROR, consumer.getAnnotation().value());
+  private ErrorMessage isMessagesRespectedWhenArgumentIsAListFor(QueueConsumer queueConsumer) {
+    Class<?> parameterType = queueConsumer.getParametersTypes().get(0);
+    return ErrorMessage.of(() -> isNotCollectionParameterWithMaxMessagesEqualToOne(parameterType, queueConsumer.getAnnotation()),
+      NO_COLLECTION_PARAMETER_WITH_MAX_MESSAGES_GREATER_THAN_ONE_ERROR, queueConsumer.getAnnotation().value());
   }
 
   private boolean isNotCollectionParameterWithMaxMessagesEqualToOne(Class<?> parameterType, SqsConsumer annotation) {
