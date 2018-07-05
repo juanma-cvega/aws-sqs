@@ -3,7 +3,7 @@ package org.jusoft.aws.sqs.executor;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.jusoft.aws.sqs.Consumer;
-import org.jusoft.aws.sqs.annotations.SqsConsumer;
+import org.jusoft.aws.sqs.annotation.SqsConsumer;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Arrays;

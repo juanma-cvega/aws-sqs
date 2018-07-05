@@ -1,7 +1,7 @@
 package org.jusoft.aws.sqs.executor;
 
 import org.jusoft.aws.sqs.Consumer;
-import org.jusoft.aws.sqs.annotations.SqsConsumer;
+import org.jusoft.aws.sqs.annotation.SqsConsumer;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

@@ -7,12 +7,13 @@ import com.amazonaws.services.sqs.model.QueueDoesNotExistException;
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import com.amazonaws.services.sqs.model.ReceiveMessageResult;
 import org.apache.commons.lang3.Validate;
-import org.jusoft.aws.sqs.annotations.SqsAttribute;
-import org.jusoft.aws.sqs.annotations.SqsBody;
-import org.jusoft.aws.sqs.annotations.SqsConsumer;
+import org.jusoft.aws.sqs.annotation.SqsAttribute;
+import org.jusoft.aws.sqs.annotation.SqsBody;
+import org.jusoft.aws.sqs.annotation.SqsConsumer;
 import org.jusoft.aws.sqs.executor.SqsExecutorFactory;
 import org.jusoft.aws.sqs.mapper.MessageMapper;
 import org.jusoft.aws.sqs.provider.ConsumerInstanceProvider;
+import org.jusoft.aws.sqs.service.DeleteMessageService;
 import org.jusoft.aws.sqs.validation.ConsumerValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,7 @@ import java.util.stream.Stream;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.toList;
-import static org.jusoft.aws.sqs.annotations.SqsConsumer.DEFAULT_MAX_LONG_POLLING_IN_SECONDS;
+import static org.jusoft.aws.sqs.annotation.SqsConsumer.DEFAULT_MAX_LONG_POLLING_IN_SECONDS;
 
 public class SqsDispatcher {
 
@@ -149,7 +150,7 @@ public class SqsDispatcher {
       .filter(isAnySqsAnnotation())
       .findFirst()
       .map(annotation -> createParameterFrom(annotation, consumer, receiveMessageResult, parameter))
-      .orElse(null); //Parameter initiated to null. Not happening as long as validation rules are in place
+      .orElse(null); //Parameter initiated to null. Not happening as long as validation rule are in place
   }
 
   private Predicate<Annotation> isAnySqsAnnotation() {

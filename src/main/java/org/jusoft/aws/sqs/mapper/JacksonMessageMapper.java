@@ -6,6 +6,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
+import static org.apache.commons.lang3.Validate.notNull;
+
 public class JacksonMessageMapper implements MessageMapper {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(JacksonMessageMapper.class);
@@ -14,6 +16,7 @@ public class JacksonMessageMapper implements MessageMapper {
 
   public JacksonMessageMapper(ObjectMapper objectMapper) {
     this.objectMapper = objectMapper;
+    notNull(objectMapper);
   }
 
   @Override

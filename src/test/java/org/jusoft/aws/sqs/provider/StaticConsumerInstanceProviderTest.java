@@ -2,7 +2,7 @@ package org.jusoft.aws.sqs.provider;
 
 import org.junit.Test;
 import org.jusoft.aws.sqs.Consumer;
-import org.jusoft.aws.sqs.annotations.SqsConsumer;
+import org.jusoft.aws.sqs.annotation.SqsConsumer;
 
 import java.lang.reflect.Method;
 

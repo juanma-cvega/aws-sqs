@@ -2,7 +2,7 @@ package org.jusoft.aws.sqs;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.jusoft.aws.sqs.annotations.SqsConsumer;
+import org.jusoft.aws.sqs.annotation.SqsConsumer;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
