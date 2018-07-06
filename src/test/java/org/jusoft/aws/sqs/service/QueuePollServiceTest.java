@@ -3,7 +3,6 @@ package org.jusoft.aws.sqs.service;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.jusoft.aws.sqs.QueueConsumer;
-import org.jusoft.aws.sqs.ReceiveMessageRequestFactory;
 import org.jusoft.aws.sqs.fixture.TestFixtures.SingleParameterMethodClass;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;

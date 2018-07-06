@@ -2,7 +2,6 @@ package org.jusoft.aws.sqs.service;
 
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import org.jusoft.aws.sqs.QueueConsumer;
-import org.jusoft.aws.sqs.ReceiveMessageRequestFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

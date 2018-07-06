@@ -1,9 +1,10 @@
-package org.jusoft.aws.sqs;
+package org.jusoft.aws.sqs.service;
 
 import com.amazonaws.services.sqs.AmazonSQS;
 import com.amazonaws.services.sqs.model.GetQueueUrlResult;
 import com.amazonaws.services.sqs.model.QueueDoesNotExistException;
 import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
+import org.jusoft.aws.sqs.QueueConsumer;
 import org.jusoft.aws.sqs.annotation.SqsConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +15,7 @@ public class ReceiveMessageRequestFactory {
 
   private final AmazonSQS amazonSQS;
 
-  ReceiveMessageRequestFactory(AmazonSQS amazonSQS) {
+  public ReceiveMessageRequestFactory(AmazonSQS amazonSQS) {
     this.amazonSQS = amazonSQS;
   }
 

@@ -31,6 +31,7 @@
     <maven-resources-plugin.version>3.0.2</maven-resources-plugin.version>
     <maven-surefire-plugin.version>2.20.1</maven-surefire-plugin.version>
     <project-encoding>UTF-8</project-encoding>
+    <assertj-swing-junit.version>3.8.0</assertj-swing-junit.version>
   </properties>
 
   <dependencies>
@@ -81,6 +82,13 @@
       <version>${assertj.version}</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-swing-junit</artifactId>
+      <version>${assertj-swing-junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <build>
