@@ -1,5 +1,6 @@
 package org.jusoft.aws.sqs;
 
+import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.jusoft.aws.sqs.annotation.SqsConsumer;
@@ -16,6 +17,9 @@ public class QueueConsumer {
   private QueueConsumer(Object consumerInstance, Method consumerMethod) {
     this.consumerInstance = consumerInstance;
     this.consumerMethod = consumerMethod;
+    Validate.notNull(this.consumerInstance);
+    Validate.notNull(this.consumerMethod);
+    Validate.notNull(getAnnotation());
   }
 
   public static QueueConsumer of(Object consumerInstance, Method consumerMethod) {

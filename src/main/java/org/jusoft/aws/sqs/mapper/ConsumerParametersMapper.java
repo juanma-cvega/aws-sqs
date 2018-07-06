@@ -49,7 +49,7 @@ public class ConsumerParametersMapper {
       .filter(isAnySqsAnnotation())
       .findFirst()
       .map(annotation -> createParameterInstanceFrom(annotation, receiveMessageResult, parameter))
-      .orElse(null); //Parameter initiated to null. Not happening as long as validation rule are in place
+      .orElse(null); //Parameter initiated to null. Not happening as long as validation rules are in place
   }
 
   private Predicate<Annotation> isAnySqsAnnotation() {

@@ -3,6 +3,7 @@ package org.jusoft.aws.sqs.validation.rule;
 import org.junit.After;
 import org.junit.Test;
 import org.jusoft.aws.sqs.QueueConsumer;
+import org.jusoft.aws.sqs.annotation.SqsConsumer;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
@@ -15,6 +16,7 @@ import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.jusoft.aws.sqs.fixture.TestFixtures.QUEUE_NAME;
 import static org.jusoft.aws.sqs.validation.rule.ErrorMessage.noError;
 import static org.jusoft.aws.sqs.validation.rule.RuleBasedConsumerValidator.VALIDATION_ERROR_MESSAGE;
 
@@ -113,6 +115,7 @@ public class RuleBasedConsumerValidatorTest {
 
     private int counter;
 
+    @SqsConsumer(QUEUE_NAME)
     public void incrementCounter() {
       counter++;
     }
