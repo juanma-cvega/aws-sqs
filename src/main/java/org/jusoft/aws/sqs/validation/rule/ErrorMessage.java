@@ -11,6 +11,11 @@ import static java.lang.System.lineSeparator;
 import static java.util.stream.Collectors.joining;
 import static org.apache.commons.lang3.Validate.notNull;
 
+/**
+ * Contains a {@link Set} with a description of all the errors found during a validation.
+ *
+ * @author Juan Manuel Carnicero Vega
+ */
 public class ErrorMessage {
 
   private final Set<String> messages;
@@ -54,6 +59,9 @@ public class ErrorMessage {
     return !messages.isEmpty();
   }
 
+  /**
+   * @return A single {@link String} with all the errors registered separated by a carriage return.
+   */
   public String getMessage() {
     return messages.stream().collect(joining(lineSeparator()));
   }

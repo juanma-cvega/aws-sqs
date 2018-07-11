@@ -6,9 +6,9 @@ import org.jusoft.aws.sqs.annotation.SqsConsumer;
 import java.lang.reflect.Method;
 import java.util.stream.Stream;
 
-public abstract class AbstractValidationRuleTest {
+import static org.jusoft.aws.sqs.fixture.TestFixtures.QUEUE_NAME;
 
-  static final String QUEUE_NAME = "queueName";
+public abstract class AbstractValidationRuleTest {
 
   QueueConsumer getConsumerFrom(Object consumerInstance) {
     Method consumerMethod = Stream.of(consumerInstance.getClass().getDeclaredMethods())

@@ -7,6 +7,11 @@ import java.util.HashSet;
 
 import static org.apache.commons.lang3.Validate.notNull;
 
+/**
+ * Creates a {@link RuleBasedConsumerValidator} using a {@link RulesProvider} to fetch all the rules available.
+ *
+ * @author Juan Manuel Carnicero Vega
+ */
 public class RuleBasedConsumerValidatorFactory implements ConsumerValidatorFactory {
 
   private final RulesProvider rulesProvider;
@@ -16,6 +21,9 @@ public class RuleBasedConsumerValidatorFactory implements ConsumerValidatorFacto
     notNull(rulesProvider);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public ConsumerValidator create() {
     return new RuleBasedConsumerValidator(new HashSet<>(rulesProvider.find()));

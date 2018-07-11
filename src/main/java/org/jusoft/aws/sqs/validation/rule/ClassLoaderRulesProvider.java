@@ -19,6 +19,13 @@ import static java.lang.reflect.Modifier.isPublic;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.lang3.Validate.notNull;
 
+/**
+ * Implementation of the {@link RulesProvider} interface that uses a {@link ClassLoader} to find all classes implementing
+ * the {@link ValidationRule} interface in the specified package. If no package is specified, the class will use the
+ * default package where library provided rules are created.
+ *
+ * @author Juan Manuel Carnicero Vega
+ */
 public class ClassLoaderRulesProvider implements RulesProvider {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ClassLoaderRulesProvider.class);
@@ -26,13 +33,13 @@ public class ClassLoaderRulesProvider implements RulesProvider {
   private static final String VALIDATION_RULES_PACKAGE = "impl";
   private static final String CURRENT_FOLDER = ClassLoaderRulesProvider.class.getPackage().getName();
   private static final String PACKAGE_NAME_SEPARATOR = ".";
-  private static final String DEFAULT_RULES_DIRECTORY = CURRENT_FOLDER.concat(PACKAGE_NAME_SEPARATOR).concat(VALIDATION_RULES_PACKAGE);
+  private static final String DEFAULT_RULES_PACKAGE = CURRENT_FOLDER.concat(PACKAGE_NAME_SEPARATOR).concat(VALIDATION_RULES_PACKAGE);
   private static final String FOLDER_SEPARATOR = "/";
 
   private final String rulesDirectory;
 
   public ClassLoaderRulesProvider() {
-    this(DEFAULT_RULES_DIRECTORY);
+    this(DEFAULT_RULES_PACKAGE);
   }
 
   public ClassLoaderRulesProvider(String rulesDirectory) {
@@ -40,6 +47,9 @@ public class ClassLoaderRulesProvider implements RulesProvider {
     notNull(this.rulesDirectory);
   }
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public Set<ValidationRule> find() {
     LOGGER.info("Path to find validation rule: path={}", rulesDirectory);
@@ -90,6 +100,7 @@ public class ClassLoaderRulesProvider implements RulesProvider {
     if (files != null) {
       classes = Stream.of(files)
         .filter(file -> !file.isDirectory())
+        .filter(this::isClassFile)
         .map(file -> getClassFrom(packageName, file))
         .filter(aClass -> !isAbstract(aClass.getModifiers()))
         .filter(aClass -> isPublic(aClass.getModifiers()))
@@ -98,6 +109,10 @@ public class ClassLoaderRulesProvider implements RulesProvider {
         .collect(Collectors.toList());
     }
     return classes;
+  }
+
+  private boolean isClassFile(File file) {
+    return file.getName().contains(".class");
   }
 
   private Class<? extends ValidationRule> toValidationRuleType(Class<?> aClass) {

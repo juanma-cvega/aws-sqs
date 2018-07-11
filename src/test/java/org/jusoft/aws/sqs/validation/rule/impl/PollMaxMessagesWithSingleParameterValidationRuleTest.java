@@ -8,7 +8,8 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.jusoft.aws.sqs.validation.rule.impl.PollMaxMessagesWithSingleParameterValidationRule.DEFAULT_MAX_MESSAGES_PER_POLL;
+import static org.jusoft.aws.sqs.annotation.SqsConsumer.MAX_MESSAGES_PER_POLL_ALLOWED;
+import static org.jusoft.aws.sqs.fixture.TestFixtures.QUEUE_NAME;
 import static org.jusoft.aws.sqs.validation.rule.impl.PollMaxMessagesWithSingleParameterValidationRule.DEFAULT_MIN_MESSAGES_PER_POLL;
 import static org.jusoft.aws.sqs.validation.rule.impl.PollMaxMessagesWithSingleParameterValidationRule.MAXIMUM_NUMBER_OF_MESSAGES_PER_POLL_ERROR;
 import static org.jusoft.aws.sqs.validation.rule.impl.PollMaxMessagesWithSingleParameterValidationRule.MINIMUM_NUMBER_OF_MESSAGES_PER_POLL_ERROR;
@@ -41,7 +42,7 @@ public class PollMaxMessagesWithSingleParameterValidationRuleTest extends Abstra
 
     assertThat(result.isValid()).isFalse();
     assertThat(result.getErrorMessage()).isEqualTo(
-      String.format(MAXIMUM_NUMBER_OF_MESSAGES_PER_POLL_ERROR, DEFAULT_MAX_MESSAGES_PER_POLL, QUEUE_NAME));
+      String.format(MAXIMUM_NUMBER_OF_MESSAGES_PER_POLL_ERROR, MAX_MESSAGES_PER_POLL_ALLOWED, QUEUE_NAME));
   }
 
   @Test
@@ -71,7 +72,7 @@ public class PollMaxMessagesWithSingleParameterValidationRuleTest extends Abstra
 
   private static class TestConsumerGreaterThanMaximumPollMessages {
 
-    @SqsConsumer(value = QUEUE_NAME, maxMessagesPerPoll = DEFAULT_MAX_MESSAGES_PER_POLL + 1)
+    @SqsConsumer(value = QUEUE_NAME, maxMessagesPerPoll = MAX_MESSAGES_PER_POLL_ALLOWED + 1)
     public void testConsumer(List<Object> object) {
 
     }
@@ -79,7 +80,7 @@ public class PollMaxMessagesWithSingleParameterValidationRuleTest extends Abstra
 
   private static class TestListParameterInvalid {
 
-    @SqsConsumer(value = QUEUE_NAME, maxMessagesPerPoll = DEFAULT_MAX_MESSAGES_PER_POLL)
+    @SqsConsumer(value = QUEUE_NAME, maxMessagesPerPoll = MAX_MESSAGES_PER_POLL_ALLOWED)
     public void testConsumer(Object object) {
 
     }

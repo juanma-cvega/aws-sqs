@@ -8,6 +8,11 @@ import org.jusoft.aws.sqs.validation.rule.ValidationRule;
 
 import static org.jusoft.aws.sqs.validation.rule.ErrorMessage.noError;
 
+/**
+ * Validates the minimum number of consumers is respected in the {@link SqsConsumer#concurrentConsumers()} field.
+ *
+ * @author Juan Manuel Carnicero Vega
+ */
 public class ConcurrentConsumersValidationRule implements ValidationRule {
 
   static final String MINIMUM_CONCURRENT_CONSUMERS_VALUE_ERROR = "The number of concurrent consumers must be greater than 0. Queue=%s";

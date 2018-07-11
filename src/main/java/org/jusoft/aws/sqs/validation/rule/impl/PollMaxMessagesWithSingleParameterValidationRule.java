@@ -8,9 +8,21 @@ import org.jusoft.aws.sqs.validation.rule.ValidationRule;
 
 import java.util.List;
 
+import static org.jusoft.aws.sqs.annotation.SqsConsumer.MAX_MESSAGES_PER_POLL_ALLOWED;
+
+/**
+ * Validates that:
+ * <li>
+ * <ul>The minimum number of messages (1) is respected in {@link SqsConsumer#maxMessagesPerPoll()}</ul>
+ * <ul>The maximum number of messages (10) is respected in {@link SqsConsumer#maxMessagesPerPoll()}</ul>
+ * <ul>The body parameter in the consumer method is a {@link List} when {@link SqsConsumer#maxMessagesPerPoll()}
+ * is higher than 1</ul>
+ * </li>
+ *
+ * @author Juan Manuel Carnicero Vega
+ */
 public class PollMaxMessagesWithSingleParameterValidationRule implements ValidationRule {
 
-  static final int DEFAULT_MAX_MESSAGES_PER_POLL = 10;
   static final int DEFAULT_MIN_MESSAGES_PER_POLL = 1;
   static final String MINIMUM_NUMBER_OF_MESSAGES_PER_POLL_ERROR = "Minimum number of messages per poll is %s. Queue=%s";
   static final String MAXIMUM_NUMBER_OF_MESSAGES_PER_POLL_ERROR = "Maximum number of messages per poll is %s. Queue=%s";
@@ -39,9 +51,9 @@ public class PollMaxMessagesWithSingleParameterValidationRule implements Validat
   }
 
   private ErrorMessage isMaximumMessagesRespectedFor(SqsConsumer annotation) {
-    return annotation.maxMessagesPerPoll() <= DEFAULT_MAX_MESSAGES_PER_POLL
+    return annotation.maxMessagesPerPoll() <= MAX_MESSAGES_PER_POLL_ALLOWED
       ? ErrorMessage.noError()
-      : ErrorMessage.of(MAXIMUM_NUMBER_OF_MESSAGES_PER_POLL_ERROR, DEFAULT_MAX_MESSAGES_PER_POLL, annotation.value());
+      : ErrorMessage.of(MAXIMUM_NUMBER_OF_MESSAGES_PER_POLL_ERROR, MAX_MESSAGES_PER_POLL_ALLOWED, annotation.value());
   }
 
   private ErrorMessage isMessagesRespectedWhenArgumentIsAListFor(QueueConsumer queueConsumer) {

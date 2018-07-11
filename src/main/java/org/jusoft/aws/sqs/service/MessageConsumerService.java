@@ -15,10 +15,22 @@ import java.util.List;
 import static java.util.stream.Collectors.toList;
 import static org.jusoft.aws.sqs.annotation.DeletePolicy.AFTER_READ;
 
+/**
+ * Polls messages from AWS SQS using a {@link ReceiveMessageRequest}. The messages are used to invoke the consumer
+ * method contained in a {@link QueueConsumer} using the {@link ConsumerInvokerService}. Depending on the
+ * {@link org.jusoft.aws.sqs.annotation.DeletePolicy} found in the consumer method
+ * {@link org.jusoft.aws.sqs.annotation.SqsConsumer} annotation, messages are deleted from the SQS queue either after
+ * being read from the queue or after the consumer has successfully processed the message.
+ *
+ * @author Juan Manuel Carnicero Vega
+ */
 public class MessageConsumerService {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MessageConsumerService.class);
 
+  /**
+   * AWS SQS client used to consume and delete messages from the queue
+   */
   private final AmazonSQS amazonSQS;
   private final ConsumerInvokerService consumerInvokerService;
 
@@ -28,6 +40,17 @@ public class MessageConsumerService {
     this.consumerInvokerService = consumerInvokerService;
   }
 
+  /**
+   * Uses the AWS SQS client to consume messages using the {@link ReceiveMessageRequest} passed as a parameter. The
+   * message(s) is then processed by invoking {@link ConsumerInvokerService} with the {@link QueueConsumer} received as
+   * parameter. Based on the {@link org.jusoft.aws.sqs.annotation.DeletePolicy} contained in the
+   * {@link org.jusoft.aws.sqs.annotation.SqsConsumer} of the consumer, the message(s) is deleted from the queue either
+   * after being read or after being successfully processed.
+   *
+   * @param queueConsumer consumer instance and method to invoke that contains the
+   *                      {@link org.jusoft.aws.sqs.annotation.SqsConsumer} annotation.
+   * @param request       AWS {@link ReceiveMessageRequest}
+   */
   public void consumeAndDeleteMessages(QueueConsumer queueConsumer,
                                        ReceiveMessageRequest request) {
     ReceiveMessageResult receiveMessageResult = amazonSQS.receiveMessage(request);

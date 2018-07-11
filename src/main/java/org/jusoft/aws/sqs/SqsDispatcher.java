@@ -17,6 +17,14 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.toList;
 import static org.jusoft.aws.sqs.annotation.SqsConsumer.DEFAULT_MAX_LONG_POLLING_IN_SECONDS;
 
+/**
+ * Fetches the list of declared AWS SQS consumers and validates them. If the list is not empty, the class creates an
+ * {@link ExecutorService} to start consuming messages from each queue using it. Once the {@link #close()} method is
+ * invoked, all queue consumers are stopped and the {@link ExecutorService} is shutdown, giving it a timeout of 20
+ * seconds to let all consumers time to finish their latest poll.
+ *
+ * @author Juan Manuel Carnicero Vega
+ */
 public class SqsDispatcher {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(SqsDispatcher.class);
@@ -38,6 +46,11 @@ public class SqsDispatcher {
     this.consumerValidator = consumerValidator;
   }
 
+  /**
+   * Fetches the list of consumers to then make them start consuming messages from the queues they are configured to
+   * poll from. This method <b>must</b> be manually invoked if no dependency injection framework able to recognize the
+   * {@link PostConstruct} annotation is used.
+   */
   @PostConstruct
   public void subscribeConsumers() {
     LOGGER.info("Initializing SQS consumers");
@@ -57,13 +70,14 @@ public class SqsDispatcher {
   }
 
   /**
-   * Method invoked when closing the application. It waits for all consumers to finish their last request before closing them
+   * Method invoked when closing the application. It waits for all consumers to finish their last request before
+   * closing them
    *
    * @throws InterruptedException
    */
   public void close() throws InterruptedException {
     LOGGER.info("Closing consumers");
-    queuePollService.close();
+    queuePollService.stop();
     if (executor != null) {
       executor.awaitTermination(DEFAULT_MAX_LONG_POLLING_IN_SECONDS, SECONDS);
     }

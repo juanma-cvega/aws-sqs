@@ -7,6 +7,11 @@ import org.jusoft.aws.sqs.validation.rule.ValidationRule;
 
 import java.lang.reflect.Modifier;
 
+/**
+ * Validates the consumer method is public.
+ *
+ * @author Juan Manuel Carnicero Vega
+ */
 public class ConsumerAccessibleValidationRule implements ValidationRule {
 
   static final String CONSUMER_METHOD_NOT_ACCESSIBLE =

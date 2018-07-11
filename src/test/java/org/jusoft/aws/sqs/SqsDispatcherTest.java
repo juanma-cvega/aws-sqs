@@ -79,7 +79,7 @@ public class SqsDispatcherTest {
   public void whenCloseSqsDispatcherButNotExecutorThenConsumersShouldNotBeStopped() throws InterruptedException {
     sqsDispatcher.close();
 
-    verify(queuePollService).close();
+    verify(queuePollService).stop();
     verifyZeroInteractions(executorService);
   }
 
@@ -95,7 +95,7 @@ public class SqsDispatcherTest {
 
     sqsDispatcher.close();
 
-    verify(queuePollService).close();
+    verify(queuePollService).stop();
     verify(executorService).awaitTermination(DEFAULT_MAX_LONG_POLLING_IN_SECONDS, SECONDS);
   }
 

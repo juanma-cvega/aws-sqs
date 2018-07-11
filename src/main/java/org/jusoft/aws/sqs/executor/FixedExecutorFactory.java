@@ -7,8 +7,17 @@ import java.util.concurrent.Executors;
 
 import static java.util.stream.StreamSupport.stream;
 
+/**
+ * Creates an {@link ExecutorService} with a fixed number of threads. The number is calculated by summing up the
+ * concurrent consumers property from each of the AWS SQS queue consumer configuration.
+ *
+ * @author Juan Manuel Carnicero Vega
+ */
 public class FixedExecutorFactory implements ExecutorFactory {
 
+  /**
+   * {@inheritDoc}
+   */
   @Override
   public ExecutorService createFor(Iterable<SqsConsumer> consumerProperties) {
     return Executors.newFixedThreadPool(getTotalConsumerThreadsFrom(consumerProperties));

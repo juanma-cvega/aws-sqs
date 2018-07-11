@@ -16,14 +16,32 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
+/**
+ * Deserialises body and attributes from AWS SQS messages into the consumer parameters, using the @{@link SqsBody} and
+ * {@link SqsAttribute} annotations as hints.
+ * The implementation expects the consumer has passed all validations so there is only one (or none) {@link SqsBody} and
+ * all {@link SqsAttribute} annotations are added to {@link String} parameters.
+ *
+ * @author Juan Manuel Carnicero Vega
+ */
 public class ConsumerParametersMapper {
 
   private final MessageMapper messageMapper;
 
+  /**
+   * Creates a {@link ConsumerParametersMapper} with a {@link MessageMapper} field. The {@link MessageMapper} is used
+   * to deserialize the body into the proper java object.
+   */
   public ConsumerParametersMapper(MessageMapper messageMapper) {
     this.messageMapper = messageMapper;
   }
 
+  /**
+   * Creates the consumer expected parameters from the {@link com.amazonaws.services.sqs.model.ReceiveMessageResult}.
+   *
+   * @param consumer             the consumer of the message. It's used to find the information about its parameters.
+   * @param receiveMessageResult AWS SQS message.
+   */
   public Object[] createFrom(Method consumer, ReceiveMessageResult receiveMessageResult) {
     Object[] result;
     if (isOnlyBodyExpected(consumer)) {

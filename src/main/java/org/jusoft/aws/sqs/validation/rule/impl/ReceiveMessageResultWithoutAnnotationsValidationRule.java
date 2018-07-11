@@ -10,6 +10,12 @@ import org.jusoft.aws.sqs.validation.rule.ValidationRule;
 
 import java.util.stream.Stream;
 
+/**
+ * Validates that there are not any either {@link SqsBody} or {@link SqsAttribute} annotations when the parameter of
+ * the consumer method is of type {@link com.amazonaws.services.sqs.model.ReceiveMessageRequest}
+ *
+ * @author Juan Manuel Carnicero Vega
+ */
 public class ReceiveMessageResultWithoutAnnotationsValidationRule implements ValidationRule {
 
   static final String RECEIVE_MESSAGE_RESULT_OBJECT_WITH_ANNOTATION_ERROR =

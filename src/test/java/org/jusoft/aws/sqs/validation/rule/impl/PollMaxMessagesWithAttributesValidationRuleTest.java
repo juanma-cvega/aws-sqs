@@ -7,6 +7,7 @@ import org.jusoft.aws.sqs.validation.rule.ConsumerValidationResult;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.jusoft.aws.sqs.fixture.TestFixtures.QUEUE_NAME;
 import static org.jusoft.aws.sqs.validation.rule.impl.PollMaxMessagesWithAttributesValidationRule.MESSAGES_WITH_MULTIPLE_PARAMETERS_ERROR;
 
 public class PollMaxMessagesWithAttributesValidationRuleTest extends AbstractValidationRuleTest {

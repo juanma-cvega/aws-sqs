@@ -31,7 +31,7 @@ public class QueuePollServiceTest {
     SingleParameterMethodClass consumerInstance = new SingleParameterMethodClass();
     QueueConsumer queueConsumer = QueueConsumer.of(consumerInstance, consumerInstance.getMethod());
     doAnswer(invocation -> {
-      queuePollService.close();
+      queuePollService.stop();
       return null;
     }).when(messageConsumerService).consumeAndDeleteMessages(queueConsumer, RECEIVE_MESSAGE_REQUEST);
     when(receiveMessageRequestFactory.createFrom(queueConsumer)).thenReturn(RECEIVE_MESSAGE_REQUEST);
@@ -47,7 +47,7 @@ public class QueuePollServiceTest {
     QueueConsumer queueConsumer = QueueConsumer.of(consumerInstance, consumerInstance.getMethod());
     doAnswer(invocation -> invocation)
       .doAnswer(invocation -> {
-        queuePollService.close();
+        queuePollService.stop();
         return null;
       }).when(messageConsumerService).consumeAndDeleteMessages(queueConsumer, RECEIVE_MESSAGE_REQUEST);
     when(receiveMessageRequestFactory.createFrom(queueConsumer)).thenReturn(RECEIVE_MESSAGE_REQUEST);
@@ -58,16 +58,33 @@ public class QueuePollServiceTest {
   }
 
   @Test
-  public void whenConsumerFailsThenQueueConsumerShouldContinueUntilClose() throws NoSuchMethodException {
+  public void whenConsumerFailsThenMessageConsumerShouldContinueUntilClose() throws NoSuchMethodException {
     SingleParameterMethodClass consumerInstance = new SingleParameterMethodClass();
     QueueConsumer queueConsumer = QueueConsumer.of(consumerInstance, consumerInstance.getMethod());
     doThrow(new RuntimeException())
       .doAnswer(invocation -> {
-        queuePollService.close();
+        queuePollService.stop();
         return null;
       }).when(messageConsumerService).consumeAndDeleteMessages(queueConsumer, RECEIVE_MESSAGE_REQUEST);
     when(receiveMessageRequestFactory.createFrom(queueConsumer)).thenReturn(RECEIVE_MESSAGE_REQUEST);
 
+    queuePollService.start(queueConsumer);
+
+    verify(messageConsumerService, times(2)).consumeAndDeleteMessages(queueConsumer, RECEIVE_MESSAGE_REQUEST);
+  }
+
+  @Test
+  public void whenConsumerIsRestartedThenMessageConsumerShouldStartConsumingMessages() throws NoSuchMethodException {
+    SingleParameterMethodClass consumerInstance = new SingleParameterMethodClass();
+    QueueConsumer queueConsumer = QueueConsumer.of(consumerInstance, consumerInstance.getMethod());
+    doAnswer(invocation -> {
+      queuePollService.stop();
+      return null;
+    }).when(messageConsumerService).consumeAndDeleteMessages(queueConsumer, RECEIVE_MESSAGE_REQUEST);
+    when(receiveMessageRequestFactory.createFrom(queueConsumer)).thenReturn(RECEIVE_MESSAGE_REQUEST);
+    queuePollService.start(queueConsumer);
+
+    queuePollService.stop();
     queuePollService.start(queueConsumer);
 
     verify(messageConsumerService, times(2)).consumeAndDeleteMessages(queueConsumer, RECEIVE_MESSAGE_REQUEST);

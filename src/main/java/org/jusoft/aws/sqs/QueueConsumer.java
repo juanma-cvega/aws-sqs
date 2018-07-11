@@ -9,11 +9,24 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Contains a consumer. Any consumer requires an instance of the class used as a consumer and the {@link Method} to
+ * invoke from the instance.
+ *
+ * @author Juan Manuel Carnicero Vega
+ */
 public class QueueConsumer {
 
   private final Object consumerInstance;
   private final Method consumerMethod;
 
+  /**
+   * Constructor of the {@link QueueConsumer}. Parameters must be not null and the {@link Method} argument must be
+   * annotated with @{@link SqsConsumer} annotation.
+   *
+   * @param consumerInstance
+   * @param consumerMethod
+   */
   private QueueConsumer(Object consumerInstance, Method consumerMethod) {
     this.consumerInstance = consumerInstance;
     this.consumerMethod = consumerMethod;
@@ -34,10 +47,16 @@ public class QueueConsumer {
     return consumerMethod;
   }
 
+  /**
+   * Returns the {@link SqsConsumer} annotation used in the consumerMethod field.
+   */
   public SqsConsumer getAnnotation() {
     return consumerMethod.getAnnotation(SqsConsumer.class);
   }
 
+  /**
+   * Returns a {@link List} with all the consumerMethod declared parameter types
+   */
   public List<Class<?>> getParametersTypes() {
     return Arrays.asList(consumerMethod.getParameterTypes());
   }

@@ -8,6 +8,11 @@ import org.jusoft.aws.sqs.validation.rule.ValidationRule;
 
 import java.util.List;
 
+/**
+ * Validates that {@link com.amazonaws.services.sqs.model.ReceiveMessageRequest} is the only parameter when it is present.
+ *
+ * @author Juan Manuel Carnicero Vega
+ */
 public class ReceiveMessageResultOnlyParameterValidationRule implements ValidationRule {
 
   static final String RECEIVE_MESSAGE_RESULT_NOT_THE_ONLY_PARAMETER_ERROR =

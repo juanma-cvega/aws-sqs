@@ -6,6 +6,11 @@ import org.jusoft.aws.sqs.QueueConsumer;
 
 import static org.apache.commons.lang3.Validate.notNull;
 
+/**
+ * Container that holds the result of a consumer method validation.
+ *
+ * @author Juan Manuel Carnicero Vega
+ */
 public class ConsumerValidationResult {
 
   private final boolean isValid;

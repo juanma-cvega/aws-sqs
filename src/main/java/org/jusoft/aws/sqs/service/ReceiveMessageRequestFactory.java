@@ -9,6 +9,14 @@ import org.jusoft.aws.sqs.annotation.SqsConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Creates a {@link ReceiveMessageRequest} based on the information contained in the consumer method {@link SqsConsumer}
+ * annotation. The queue URL is fetched from the AWS account using the {@link AmazonSQS} client and the name of the
+ * queue passed in the {@link SqsConsumer} annotation. <b>In case the URL cannot be fetched, a {@link System#exit(int)}
+ * is invoked.</b>
+ *
+ * @author Juan Manuel Carnicero Vega
+ */
 public class ReceiveMessageRequestFactory {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(ReceiveMessageRequestFactory.class);
@@ -19,6 +27,13 @@ public class ReceiveMessageRequestFactory {
     this.amazonSQS = amazonSQS;
   }
 
+  /**
+   * Creates the {@link ReceiveMessageRequest} using the {@link SqsConsumer} annotation from the {@link QueueConsumer}.
+   * The queue URL is fetched from the AWS account using the {@link AmazonSQS} client and the name of the queue contained
+   * in the {@link SqsConsumer}. <b>In case the URL cannot be fetched, a {@link System#exit(int)} is invoked.</b>
+   *
+   * @param queueConsumer consumer instance and method annotated with {@link SqsConsumer}.
+   */
   public ReceiveMessageRequest createFrom(QueueConsumer queueConsumer) {
     SqsConsumer annotation = queueConsumer.getAnnotation();
     return new ReceiveMessageRequest(findQueueUrlOrFailFrom(annotation.value()))

@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class ClassLoaderRulesProviderTest {
 
-  private static final int CURRENT_DEFAULT_VALIDATION_RULES = 9;
+  private static final int CURRENT_DEFAULT_VALIDATION_RULES = 10;
 
   private ClassLoaderRulesProvider provider;
 

@@ -6,6 +6,7 @@ import org.jusoft.aws.sqs.validation.rule.ConsumerValidationResult;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.jusoft.aws.sqs.fixture.TestFixtures.QUEUE_NAME;
 import static org.jusoft.aws.sqs.validation.rule.impl.ConsumerParametersValidationRule.MINIMUM_PARAMETERS_VALUE_ERROR;
 
 public class ConsumerParametersValidationRuleTest extends AbstractValidationRuleTest {

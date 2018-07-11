@@ -8,6 +8,7 @@ import org.jusoft.aws.sqs.validation.rule.ConsumerValidationResult;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.jusoft.aws.sqs.fixture.TestFixtures.QUEUE_NAME;
 import static org.jusoft.aws.sqs.validation.rule.impl.ParametersAnnotationsValidationRule.MULTIPLE_SQS_BODY_ANNOTATIONS_ERROR;
 import static org.jusoft.aws.sqs.validation.rule.impl.ParametersAnnotationsValidationRule.PARAMETER_ANNOTATION_NUMBER_RESTRICTION_ERROR;
 import static org.jusoft.aws.sqs.validation.rule.impl.ParametersAnnotationsValidationRule.SINGLE_PARAMETER_NOT_BODY_ERROR;

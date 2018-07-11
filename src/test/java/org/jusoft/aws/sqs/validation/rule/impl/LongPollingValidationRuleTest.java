@@ -6,8 +6,9 @@ import org.jusoft.aws.sqs.validation.rule.ConsumerValidationResult;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.jusoft.aws.sqs.validation.rule.impl.LongPollingValidationRule.DEFAULT_MAX_LONG_POLLING_VALUE_IN_SECONDS;
-import static org.jusoft.aws.sqs.validation.rule.impl.LongPollingValidationRule.LONG_POLLING_DISABLED_VALUE;
+import static org.jusoft.aws.sqs.annotation.SqsConsumer.DEFAULT_MAX_LONG_POLLING_IN_SECONDS;
+import static org.jusoft.aws.sqs.annotation.SqsConsumer.SHORT_POLLING_VALUE;
+import static org.jusoft.aws.sqs.fixture.TestFixtures.QUEUE_NAME;
 import static org.jusoft.aws.sqs.validation.rule.impl.LongPollingValidationRule.MAXIMUM_LONG_POLLING_VALUE_ERROR;
 import static org.jusoft.aws.sqs.validation.rule.impl.LongPollingValidationRule.MINIMUM_LONG_POLLING_VALUE_ERROR;
 
@@ -37,7 +38,7 @@ public class LongPollingValidationRuleTest extends AbstractValidationRuleTest {
 
     assertThat(result.isValid()).isFalse();
     assertThat(result.getErrorMessage()).isEqualTo(String.format(MAXIMUM_LONG_POLLING_VALUE_ERROR,
-      DEFAULT_MAX_LONG_POLLING_VALUE_IN_SECONDS, QUEUE_NAME));
+      DEFAULT_MAX_LONG_POLLING_IN_SECONDS, QUEUE_NAME));
   }
 
   @Test
@@ -64,14 +65,14 @@ public class LongPollingValidationRuleTest extends AbstractValidationRuleTest {
   }
 
   private static class TestDisableLongPollingConsumer {
-    @SqsConsumer(value = QUEUE_NAME, longPolling = LONG_POLLING_DISABLED_VALUE)
+    @SqsConsumer(value = QUEUE_NAME, longPolling = SHORT_POLLING_VALUE)
     public void testConsumer() {
 
     }
   }
 
   private static class TestMaxLongPollingSurpassedConsumer {
-    @SqsConsumer(value = QUEUE_NAME, longPolling = DEFAULT_MAX_LONG_POLLING_VALUE_IN_SECONDS + 1)
+    @SqsConsumer(value = QUEUE_NAME, longPolling = DEFAULT_MAX_LONG_POLLING_IN_SECONDS + 1)
     public void testConsumer() {
 
     }

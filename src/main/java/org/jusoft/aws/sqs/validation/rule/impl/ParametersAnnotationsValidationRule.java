@@ -14,11 +14,21 @@ import java.util.stream.Stream;
 
 import static org.jusoft.aws.sqs.validation.rule.ErrorMessage.noError;
 
+/**
+ * Validates that:
+ * <li>
+ * <ul>Each consumer method argument has either a @{@link SqsBody} or a {@link SqsAttribute} only once.</ul>
+ * <ul>The {@link SqsBody} annotation is used only once</ul>
+ * <ul>The {@link SqsAttribute} is not used when there is only one parameter in the consumer method</ul>
+ * </li>
+ *
+ * @author Juan Manuel Carnicero Vega
+ */
 public class ParametersAnnotationsValidationRule implements ValidationRule {
 
   static final String PARAMETER_ANNOTATION_NUMBER_RESTRICTION_ERROR = "A consumer argument must have a unique SQS annotation. Queue=%s";
   static final String MULTIPLE_SQS_BODY_ANNOTATIONS_ERROR = "SqsBody annotation must appear once in the definition of a consumer. Queue=%s";
-  static final String SINGLE_PARAMETER_NOT_BODY_ERROR = "SqsBody annotation must the only SQS annotation when there is a single parameter. Queue=%s";
+  static final String SINGLE_PARAMETER_NOT_BODY_ERROR = "SqsBody annotation must be the only SQS annotation when there is a single parameter. Queue=%s";
 
   private static final int ALLOWED_ANNOTATIONS_PER_PARAMETER = 1;
 
@@ -52,10 +62,8 @@ public class ParametersAnnotationsValidationRule implements ValidationRule {
   }
 
   private ErrorMessage validateAllConsumerParametersHaveValidAnnotations(QueueConsumer queueConsumer) {
-    ErrorMessage errorMessage = noError();
-    errorMessage.addMessage(ErrorMessage.of(isSqsAnnotationNotRepeatedFor(queueConsumer), PARAMETER_ANNOTATION_NUMBER_RESTRICTION_ERROR, queueConsumer.getAnnotation().value()));
-    errorMessage.addMessage(ErrorMessage.of(isSqsBodyAnnotationOnlyOnceFor(queueConsumer), MULTIPLE_SQS_BODY_ANNOTATIONS_ERROR, queueConsumer.getAnnotation().value()));
-    return errorMessage;
+    return ErrorMessage.of(isSqsAnnotationNotRepeatedFor(queueConsumer), PARAMETER_ANNOTATION_NUMBER_RESTRICTION_ERROR, queueConsumer.getAnnotation().value())
+      .addMessage(ErrorMessage.of(isSqsBodyAnnotationOnlyOnceFor(queueConsumer), MULTIPLE_SQS_BODY_ANNOTATIONS_ERROR, queueConsumer.getAnnotation().value()));
   }
 
   private Supplier<Boolean> isSqsAnnotationNotRepeatedFor(QueueConsumer queueConsumer) {

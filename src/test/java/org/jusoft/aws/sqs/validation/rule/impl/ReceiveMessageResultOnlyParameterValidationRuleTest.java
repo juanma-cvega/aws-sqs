@@ -7,6 +7,7 @@ import org.jusoft.aws.sqs.validation.rule.ConsumerValidationResult;
 
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.jusoft.aws.sqs.fixture.TestFixtures.QUEUE_NAME;
 import static org.jusoft.aws.sqs.validation.rule.impl.ReceiveMessageResultOnlyParameterValidationRule.RECEIVE_MESSAGE_RESULT_NOT_THE_ONLY_PARAMETER_ERROR;
 
 public class ReceiveMessageResultOnlyParameterValidationRuleTest extends AbstractValidationRuleTest {
