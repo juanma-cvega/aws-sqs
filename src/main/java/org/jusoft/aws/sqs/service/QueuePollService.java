@@ -24,10 +24,17 @@ public class QueuePollService {
    */
   private boolean isConsumerActive;
 
+  /**
+   * Initialises the flag to control the loop of message consumption to active.
+   *
+   * @param receiveMessageRequestFactory
+   * @param messageConsumerService
+   */
   public QueuePollService(ReceiveMessageRequestFactory receiveMessageRequestFactory,
                           MessageConsumerService messageConsumerService) {
     this.receiveMessageRequestFactory = receiveMessageRequestFactory;
     this.messageConsumerService = messageConsumerService;
+    isConsumerActive = true;
   }
 
   /**
@@ -41,7 +48,6 @@ public class QueuePollService {
     String queueName = queueConsumer.getAnnotation().value();
     LOGGER.info("Starting queueConsumer: queue={}", queueName);
 
-    isConsumerActive = true;
     ReceiveMessageRequest request = receiveMessageRequestFactory.createFrom(queueConsumer);
     while (isConsumerActive) {
       try {
